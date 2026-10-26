@@ -486,24 +486,19 @@ footer{background:#08463a;color:#cfe7de;margin-top:22px;padding:20px 16px}
 <footer>ViaChocó Alerta · Prototipo para el curso Emprendimiento Tecnológico · Los trazados de las vías son aproximados.</footer>
 <div id="auth" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="auth-t">
  <div class="mbox">
-  <div class="mhead"><h2 id="auth-t">ViaChocó Alerta</h2><p id="au-msg">Ingrese o cree su cuenta para reportar.</p><button type="button" class="mx" id="au-x" aria-label="Cerrar">✕</button></div>
-  <div class="mtabs" role="tablist"><button type="button" role="tab" data-at="login" aria-selected="true">Ingresar</button><button type="button" role="tab" data-at="reg" aria-selected="false">Crear cuenta</button></div>
-  <form id="au-login" class="mform" novalidate>
-   <label for="li-id">Celular o correo</label><input type="text" id="li-id" autocomplete="username" inputmode="email" required>
-   <label for="li-pw">Contraseña</label><input type="password" id="li-pw" autocomplete="current-password" required style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit">
-   <p class="err" id="li-err" role="alert"></p>
-   <button class="btn" type="submit">Ingresar</button>
+  <div class="mhead"><h2 id="auth-t">ViaChocó Alerta</h2><p id="au-msg">Ingrese con su celular para reportar.</p><button type="button" class="mx" id="au-x" aria-label="Cerrar">✕</button></div>
+  <form id="au-1" class="mform" novalidate>
+   <label for="au-nom">Nombre (solo la primera vez)</label><input type="text" id="au-nom" autocomplete="name">
+   <label for="au-cel">Celular</label><input type="tel" id="au-cel" autocomplete="tel" inputmode="tel" placeholder="3xx xxx xxxx">
+   <p class="err" id="au1-err" role="alert"></p>
+   <button class="btn" type="submit">Enviar código</button>
   </form>
-  <form id="au-reg" class="mform" hidden novalidate>
-   <label for="rg-n">Nombre completo</label><input type="text" id="rg-n" autocomplete="name" required>
-   <label for="rg-c">Celular o correo</label><input type="text" id="rg-c" autocomplete="username" inputmode="email" required>
-   <label for="rg-r">Tipo de cuenta</label><select id="rg-r"><option>Ciudadano</option><option>Líder comunitario</option><option value="Autoridad">Autoridad (requiere código)</option></select>
-   <div id="rg-codew" hidden><label for="rg-code">Código de autoridad</label><input type="password" id="rg-code" autocomplete="off" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit"><span class="hint">Se entrega solo a funcionarios de INVÍAS, Gobernación o gestión del riesgo.</span></div>
-   <div class="row" style="margin-top:0"><div><label for="rg-p">Contraseña (mín. 6)</label><input type="password" id="rg-p" autocomplete="new-password" required style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit"></div>
-   <div><label for="rg-p2">Repetir contraseña</label><input type="password" id="rg-p2" autocomplete="new-password" required style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit"></div></div>
-   <label class="chk"><input type="checkbox" id="rg-ok"> Acepto que mis reportes se muestren públicamente con mi primer nombre.</label>
-   <p class="err" id="rg-err" role="alert"></p>
-   <button class="btn" type="submit">Crear cuenta</button>
+  <form id="au-2" class="mform" hidden novalidate>
+   <p class="hint" id="au2-info"></p>
+   <label for="au-cod">Código de 6 dígitos</label><input type="text" id="au-cod" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
+   <p class="err" id="au2-err" role="alert"></p>
+   <button class="btn" type="submit">Verificar e ingresar</button>
+   <button class="btn sec" type="button" id="au-back" style="margin-top:8px">Cambiar número</button>
   </form>
  </div>
 </div>
@@ -515,8 +510,7 @@ footer{background:#08463a;color:#cfe7de;margin-top:22px;padding:20px 16px}
 'use strict';
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const KEY='vca_v04';
-const AUTH_CODE='CHOCO-AUT-2026'; /* cámbielo: código que se entrega solo a funcionarios */
+const KEY='vca_v05';
 const COL={verde:'#178a4c',amarillo:'#c98a00',rojo:'#c8352a',gris:'#7a8b86'};
 const TIPOS={derrumbe:'Derrumbe',hundimiento:'Hundimiento',inundacion:'Inundación',cierre:'Cierre de paso',restriccion:'Paso restringido'};
 const ICON={derrumbe:'⛰️',hundimiento:'⬇️',inundacion:'🌊',cierre:'⛔',restriccion:'🚧'};
@@ -547,7 +541,7 @@ function load(){
  S.alerts=S.alerts||[];S.tests=S.tests||[];S.queue=S.queue||[];
  S.sub=S.sub||{rutas:['QM'],canal:'Push',tel:''};
  S.role=cur()?cur().rol:'Ciudadano';if(typeof S.rep!=='number')S.rep=20;if(cur()&&typeof cur().rep==='number')S.rep=cur().rep;if(S.online===undefined)S.online=true;
- S.nid=Math.max(S.nid||1,...S.reports.map(r=>r.id+1),...S.queue.map(r=>r.id+1));
+ S.nid=1;
  S.last=S.last||{};TRAMOS.forEach(t=>{if(!S.last[t.id])S.last[t.id]=tStatus(t.id)})}
 function save(){const u=cur();if(u)u.rep=S.rep;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('No se pudo guardar: almacenamiento lleno o bloqueado')}}
 function tStatus(id){const a=S.reports.filter(r=>r.t===id&&r.st!=='resuelto');if(!a.length)return'verde';
@@ -564,14 +558,15 @@ function commit(){
    S.last[t.id]=ns}});
  save();renderAll()}
 function verify(r){if(r.st==='pendiente'){r.st='verificado';r.vts=Date.now();if(r.mine)S.rep+=10}}
-function submitReport(r){
- if(!S.online&&r.canal==='App web'){S.queue.push(r);save();toast('Sin conexión: reporte guardado en la cola');renderAll();return false}
- if(S.role!=='Ciudadano')verify(r);
- S.reports.unshift(r);commit();return true}
+async function sendRep(r){await api('/reportes',{method:'POST',body:{tramo:r.t,tipo:r.tipo,gravedad:r.sev,descripcion:r.desc,lat:r.lat,lng:r.lng,gps_real:!!r.gps,foto:r.photo||null,canal:CAN[r.canal]||'app_web'}})}
+async function submitReport(r){
+ if(!S.online&&r.canal==='App web'){S.queue.push(r);save();toast('Sin conexión: reporte guardado en la cola');renderAll();return 'cola'}
+ try{await sendRep(r);await refresh();return true}catch(e){toast(e.message);return false}}
 const byId=id=>S.reports.find(x=>x.id===id);
-function confirmar(id){if(!need('Inicie sesión para confirmar reportes.'))return;const r=byId(id);if(!r||r.st==='resuelto')return;r.conf++;S.rep+=2;if(S.role!=='Ciudadano'||r.conf>=3)verify(r);toast('Gracias por confirmar (+2 de reputación)');if(map)map.closePopup();commit()}
-function negar(id){if(!need('Inicie sesión para opinar sobre un reporte.'))return;const r=byId(id);if(!r)return;r.deny++;if(r.deny>=3||S.role!=='Ciudadano')r.st='resuelto';if(map)map.closePopup();commit()}
-function resolver(id){if(!need('Inicie sesión para continuar.'))return;const r=byId(id);if(!r)return;r.st='resuelto';if(map)map.closePopup();commit()}
+async function votar(id,voto,msg){if(!need('Inicie sesión para opinar sobre un reporte.'))return;try{await api('/reportes/'+id+'/votos',{method:'POST',body:{voto:voto}});toast(msg);if(map)map.closePopup();await refresh()}catch(e){toast(e.message)}}
+const confirmar=id=>votar(id,'confirma','Gracias por confirmar el reporte');
+const negar=id=>votar(id,'descarta','Gracias, su opinión quedó registrada');
+async function resolver(id){if(!need('Inicie sesión para continuar.'))return;try{await api('/reportes/'+id+'/resolver',{method:'POST'});if(map)map.closePopup();await refresh()}catch(e){toast(e.message)}}
 function acciones(r,withMap){const v=withMap?'<button data-act="ver" data-id="'+r.id+'">📍 Ver en mapa</button>':'';
  if(r.st==='resuelto')return v?'<div class="pbtn">'+v+'</div>':'';
  return'<div class="pbtn">'+v+'<button data-act="conf" data-id="'+r.id+'">✔ Confirmar</button><button data-act="deny" data-id="'+r.id+'">✖ Ya no está</button>'+(S.role==='Autoridad'?'<button data-act="res" data-id="'+r.id+'">Marcar resuelto</button>':'')+'</div>'}
@@ -586,12 +581,11 @@ if(name==='reportar'&&!cur()){openAuth('login','Cree una cuenta o inicie sesión
  if(name==='mapa'&&map)setTimeout(()=>map.invalidateSize(),60);
  window.scrollTo({top:0,behavior:'smooth'})}
 $$('#nav button').forEach(b=>b.addEventListener('click',()=>gotoTab(b.dataset.tab)));
-document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const id=+b.dataset.id,a=b.dataset.act;
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const id=b.dataset.id,a=b.dataset.act;
  if(a==='conf')confirmar(id);else if(a==='deny')negar(id);else if(a==='res')resolver(id);
  else if(a==='ver')focusReport(id);else if(a==='go')gotoTab(b.dataset.tab)});
-$('#online').onchange=e=>{S.online=e.target.checked;
- if(S.online&&S.queue.length){const n=S.queue.length;S.queue.forEach(r=>{if(S.role!=='Ciudadano')verify(r);S.reports.unshift(r)});S.queue=[];toast('Conexión restablecida: '+n+' reporte(s) sincronizado(s)');commit()}
- else{save();renderAll()}};
+$('#online').onchange=async e=>{S.online=e.target.checked;
+ if(S.online&&S.queue.length){const q=S.queue.splice(0);let n=0;for(const r of q){try{await sendRep(r);n++}catch(x){S.queue.push(r)}}toast('Conexión restablecida: '+n+' reporte(s) sincronizado(s)');await refresh()} else{save();renderAll()}};
 
 const BASES={
  calles:{n:'Calles',url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxZoom:19,attribution:'© OpenStreetMap'}},
@@ -658,7 +652,7 @@ function bars(el,data){const m=Math.max(1,...data.map(d=>d[1]));$(el).innerHTML=
 function renderPanel(){const R=S.reports,c=s=>R.filter(r=>r.st===s).length;
  const tv=R.filter(r=>r.vts).map(r=>(r.vts-r.ts)/60000),avg=tv.length?Math.round(tv.reduce((a,b)=>a+b,0)/tv.length)+' min':'—';
  const k=(n,l)=>'<div class="card kpi"><b>'+n+'</b><span>'+l+'</span></div>';
- $('#kpis').innerHTML=k(S.users.length,'Usuarios registrados')+k(R.length,'Reportes totales')+k(c('verificado'),'Verificados')+k(c('pendiente'),'Pendientes')+k(c('resuelto'),'Resueltos')+k(avg,'Tiempo medio a verificación')+k(TRAMOS.filter(t=>tStatus(t.id)!=='verde').length+'/'+TRAMOS.length,'Tramos con novedad');
+ $('#kpis').innerHTML=k(R.length,'Reportes totales')+k(c('verificado'),'Verificados')+k(c('pendiente'),'Pendientes')+k(c('resuelto'),'Resueltos')+k(avg,'Tiempo medio a verificación')+k(TRAMOS.filter(t=>tStatus(t.id)!=='verde').length+'/'+TRAMOS.length,'Tramos con novedad');
  bars('#b-tramo',TRAMOS.map(t=>[t.short,R.filter(r=>r.t===t.id).length]).sort((a,b)=>b[1]-a[1]));
  bars('#b-tipo',Object.keys(TIPOS).map(k=>[TIPOS[k],R.filter(r=>r.tipo===k).length]));
  const pr=TRAMOS.map(t=>{const a=R.filter(r=>r.t===t.id&&r.st!=='resuelto');return{t:t,n:a.length,sc:a.reduce((s,r)=>s+r.sev*(r.st==='verificado'?2:1),0)}}).sort((a,b)=>b.sc-a.sc);
@@ -688,19 +682,19 @@ $('#btn-gps').onclick=()=>{
   ()=>toast('No se pudo obtener el GPS'),{enableHighAccuracy:true,timeout:8000})};
 $('#f-foto').onchange=e=>{const f=e.target.files[0];photo=null;$('#f-prev').innerHTML='';if(!f)return;
  const img=new Image,u=URL.createObjectURL(f);img.onload=()=>{const k=Math.min(1,360/img.width),c=document.createElement('canvas');c.width=img.width*k;c.height=img.height*k;c.getContext('2d').drawImage(img,0,0,c.width,c.height);photo=c.toDataURL('image/jpeg',.6);$('#f-prev').innerHTML='<img alt="Vista previa" src="'+photo+'" style="max-width:160px;border-radius:10px;margin-top:8px">';URL.revokeObjectURL(u)};img.src=u};
-$('#frm').onsubmit=e=>{e.preventDefault();if(!cur()){openAuth('login','Inicie sesión para enviar el reporte.','reportar');return}
+$('#frm').onsubmit=async e=>{e.preventDefault();if(!cur()){openAuth('login','Inicie sesión para enviar el reporte.','reportar');return}
  const f=new FormData(e.target),tipo=f.get('tipo')||'derrumbe',t=f.get('tramo'),pos=gps||pointAt(TR(t),+f.get('frac')/100);
  const r={id:S.nid++,t:t,tipo:tipo,sev:tipo==='cierre'?3:+(f.get('sev')||2),desc:(f.get('desc')||'').trim(),lat:pos[0],lng:pos[1],ts:Date.now(),conf:1,deny:0,st:'pendiente',canal:'App web',mine:true,by:cur().nombre.split(' ')[0],uid:cur().id};
- if(photo)r.photo=photo;
- const ok=submitReport(r);
- if(ok){toast('Reporte #'+r.id+' registrado. Queda pendiente hasta que otros lo confirmen.')}
- e.target.reset();photo=null;gps=null;$('#f-prev').innerHTML='';$('#f-cnt').textContent='0/200';kmLabel();
- if(ok){gotoTab('mapa');setTimeout(()=>focusReport(r.id),150)}};
+ if(photo)r.photo=photo;r.gps=!!gps;
+ const ok=await submitReport(r);
+ if(ok===true){toast('Reporte registrado. Queda pendiente hasta que otros lo confirmen.')}
+ if(ok){e.target.reset();photo=null;gps=null;$('#f-prev').innerHTML='';$('#f-cnt').textContent='0/200';kmLabel()}
+ if(ok===true)gotoTab('mapa')};
 
 /* ---------- Bot ---------- */
 function say(txt,who){const d=document.createElement('div');d.className='msg '+who;d.textContent=txt;$('#chat').appendChild(d);$('#chat').scrollTop=1e9}
 const norm=s=>s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-function bot(raw){const t=norm(raw.trim()),w=t.split(/\s+/),cmd=w[0],canal=$('#bot-canal').value;
+async function bot(raw){const t=norm(raw.trim()),w=t.split(/\s+/),cmd=w[0],canal=$('#bot-canal').value;
  if(cmd==='AYUDA'||!cmd)return'Comandos:\nREPORTE <TIPO> <TRAMO> [km N] [GRAVE]\nESTADO [TRAMO]\nTipos: DERRUMBE, HUNDIMIENTO, INUNDACION, CIERRE, RESTRICCION\nTramos: '+TRAMOS.map(x=>x.id+'='+x.short).join(', ');
  if(cmd==='ESTADO'){if(w[1]){const x=TR(w[1]);return x?x.short+': '+LBL[tStatus(x.id)]:'Tramo no válido. Escriba AYUDA.'}
   return TRAMOS.map(x=>x.id+' '+x.short+': '+LBL[tStatus(x.id)]).join('\n')}
@@ -708,9 +702,9 @@ function bot(raw){const t=norm(raw.trim()),w=t.split(/\s+/),cmd=w[0],canal=$('#b
   if(!tipo||!x)return'Formato no válido. Ejemplo: REPORTE DERRUMBE T1 km 45 grave';
   const km=(t.match(/KM\s*(\d+)/)||[])[1],p=pointAt(x,km?Math.min(1,+km/x.km):.5);
   const r={id:S.nid++,t:x.id,tipo:tipo,sev:(/GRAVE/.test(t)||tipo==='cierre')?3:2,desc:raw.trim().split(/\s+/).slice(3).join(' '),lat:p[0],lng:p[1],ts:Date.now(),conf:1,deny:0,st:'pendiente',canal:canal,mine:true,by:cur().nombre.split(' ')[0],uid:cur().id};
-  submitReport(r);return'Reporte #'+r.id+' recibido: '+TIPOS[tipo]+' en '+x.short+'. Queda pendiente de verificación. Gracias.'}
+  const ok=await submitReport(r);if(!ok)return'No se pudo registrar el reporte. Intente de nuevo.';return'Reporte recibido: '+TIPOS[tipo]+' en '+x.short+'. Queda pendiente de verificación. Gracias.'}
  return'No entendí el mensaje. Escriba AYUDA.'}
-function send(v){v=(v||$('#bot-in').value).trim();if(!v)return;say(v,'u');$('#bot-in').value='';setTimeout(()=>say(bot(v),'b'),350)}
+function send(v){v=(v||$('#bot-in').value).trim();if(!v)return;say(v,'u');$('#bot-in').value='';setTimeout(async()=>say(await bot(v),'b'),350)}
 $('#bot-send').onclick=()=>send();$('#bot-in').onkeydown=e=>{if(e.key==='Enter')send()};
 $$('[data-cmd]').forEach(b=>b.onclick=()=>send(b.dataset.cmd));
 say('ViaChocó Alerta: escriba AYUDA para ver los comandos.','b');
@@ -729,38 +723,43 @@ $('#tfrm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);
  e.target.reset();save();renderTests();toast('Resultado de prueba guardado')};
 $('#csv-test').onclick=()=>download('pruebas_viachoco.csv',[['fecha','nombre','perfil','tarea1','tarea2','tarea3','facilidad','utilidad','usaria','canal','pago','comentario']].concat(S.tests.map(t=>[t.fecha,t.nombre,t.perfil,t.t1?1:0,t.t2?1:0,t.t3?1:0,t.q1,t.q2,t.q3,t.canal,t.pago,t.com])));
 
-/* ---------- Cuentas (locales en este dispositivo) ---------- */
+/* ---------- Cuentas: ingreso por código SMS, contra el servidor ---------- */
+const ROLES={ciudadano:'Ciudadano',lider:'Líder comunitario',autoridad:'Autoridad',admin:'Autoridad'};
+const CAN={'App web':'app_web','SMS':'sms','WhatsApp':'whatsapp'};
+const CANR={app_web:'App web',sms:'SMS',whatsapp:'WhatsApp'};
+const TOK='vca_token';
+const tok=()=>{try{return localStorage.getItem(TOK)||''}catch(e){return''}};
+const setTok=v=>{try{if(v)localStorage.setItem(TOK,v);else localStorage.removeItem(TOK)}catch(e){}};
+async function api(path,o){o=o||{};const h={'Content-Type':'application/json'},t=tok();if(t)h.Authorization='Bearer '+t;
+ let r;try{r=await fetch('/api'+path,{method:o.method||'GET',headers:h,body:o.body?JSON.stringify(o.body):undefined})}catch(e){throw new Error('Sin conexión con el servidor')}
+ let d=null;try{d=await r.json()}catch(e){}
+ if(!r.ok){if(r.status===401&&t){setTok('');S.users=[];S.session=null;renderHeader()}const er=new Error((d&&d.error)||'Error del servidor');er.status=r.status;throw er}
+ return d}
+function mapR(x){return{id:x.id,t:x.tramo_id,tipo:x.tipo,sev:+x.gravedad,desc:x.descripcion||'',lat:+x.lat,lng:+x.lng,ts:new Date(x.creado_en).getTime(),conf:+x.confirmaciones,deny:+x.descartes,st:x.estado==='reportado'?'pendiente':x.estado,canal:CANR[x.canal]||'App web',mine:!!x.mio,by:'',photo:x.foto_url||undefined,vts:x.verificado_en?new Date(x.verificado_en).getTime():undefined}}
+let warned=false;
+async function refresh(){try{S.reports=(await api('/reportes')).map(mapR);warned=false}catch(e){if(!warned){warned=true;toast('No se pudieron cargar los reportes: '+e.message)}}commit()}
 function cur(){return S&&S.users?S.users.find(u=>u.id===S.session)||null:null}
 function need(m){if(cur())return true;openAuth('login',m);return false}
-let after=null;
-async function hash(p,salt){const s=salt+'|'+p;try{if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}}catch(e){}
- let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return'f'+(h>>>0).toString(16)}
-const cid=v=>v.trim().toLowerCase().replace(/\s+/g,'');
-function setAT(t){$('#rg-codew').hidden=$('#rg-r').value!=='Autoridad';$$('[data-at]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.at===t)));$('#au-login').hidden=t!=='login';$('#au-reg').hidden=t!=='reg';$('#li-err').textContent='';$('#rg-err').textContent=''}
-function openAuth(t,msg,next){after=next||null;$('#au-msg').textContent=msg||'Ingrese o cree su cuenta para reportar.';setAT(t);$('#auth').hidden=false;setTimeout(()=>$(t==='login'?'#li-id':'#rg-n').focus(),50)}
+function setUser(u){S.users=[{id:'u1',nombre:u.nombre||'Usuario',rol:ROLES[u.rol]||'Ciudadano',rep:+u.reputacion||0}];S.session='u1';S.rep=S.users[0].rep}
+async function restore(){if(!tok())return;try{setUser(await api('/me'))}catch(e){}}
+let after=null,celPend='';
+function openAuth(t,msg,next){after=next||null;$('#au-msg').textContent=msg||'Ingrese con su celular para reportar.';$('#au-1').hidden=false;$('#au-2').hidden=true;$('#au1-err').textContent='';$('#auth').hidden=false;setTimeout(()=>$('#au-cel').focus(),50)}
 function closeAuth(){$('#auth').hidden=true;after=null}
-function enter(u){S.session=u.id;S.rep=typeof u.rep==='number'?u.rep:20;const n=after;$('#auth').hidden=true;after=null;save();renderAll();toast('Bienvenido, '+u.nombre.split(' ')[0]);if(n)gotoTab(n)}
-$('#rg-r').onchange=e=>{$('#rg-codew').hidden=e.target.value!=='Autoridad'};
-$$('[data-at]').forEach(b=>b.onclick=()=>setAT(b.dataset.at));
+const normCel=v=>{const c=String(v||'').replace(/[^\d+]/g,'');if(/^3\d{9}$/.test(c))return'+57'+c;if(/^57\d{10}$/.test(c))return'+'+c;return c};
+async function enterUser(u){setUser(u);const n=after;$('#auth').hidden=true;after=null;$('#au-1').reset();$('#au-2').reset();toast('Bienvenido, '+S.users[0].nombre.split(' ')[0]);await refresh();if(n)gotoTab(n)}
 $('#au-x').onclick=closeAuth;$('#auth').onclick=e=>{if(e.target.id==='auth')closeAuth()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#auth').hidden)closeAuth()});
-$('#userbtn').onclick=()=>{if(cur()){S.session=null;S.rep=20;save();gotoTab('mapa');renderAll();toast('Sesión cerrada')}else openAuth('login')};
-$('#au-login').onsubmit=async e=>{e.preventDefault();const u=S.users.find(x=>x.contacto===cid($('#li-id').value));
- if(!u||u.hash!==await hash($('#li-pw').value,u.salt)){$('#li-err').textContent='Datos incorrectos. Revise e intente de nuevo.';return}
- e.target.reset();enter(u)};
-$('#au-reg').onsubmit=async e=>{e.preventDefault();const n=$('#rg-n').value.trim().replace(/\s+/g,' '),c=cid($('#rg-c').value),p=$('#rg-p').value,E=$('#rg-err'),
- mail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c),tel=/^\+?\d{7,13}$/.test(c);
- if(n.length<3)return E.textContent='Escriba su nombre completo.';
- if(!mail&&!tel)return E.textContent='Escriba un correo válido o un celular (solo números).';
- if(p.length<6)return E.textContent='La contraseña debe tener al menos 6 caracteres.';
- if(p!==$('#rg-p2').value)return E.textContent='Las contraseñas no coinciden.';
- if($('#rg-r').value==='Autoridad'&&$('#rg-code').value.trim()!==AUTH_CODE)return E.textContent='Código de autoridad incorrecto.';
- if(!$('#rg-ok').checked)return E.textContent='Debe aceptar para continuar.';
- if(S.users.some(u=>u.contacto===c))return E.textContent='Ya existe una cuenta con ese celular o correo. Ingrese.';
- const salt=Math.random().toString(36).slice(2)+Date.now().toString(36),u={id:'u'+Date.now(),nombre:n,contacto:c,salt:salt,hash:await hash(p,salt),rol:$('#rg-r').value,creado:new Date().toISOString(),rep:20};
- S.users.push(u);e.target.reset();enter(u)};
+$('#au-back').onclick=()=>{$('#au-2').hidden=true;$('#au-1').hidden=false};
+$('#userbtn').onclick=()=>{if(cur()){setTok('');S.users=[];S.session=null;S.rep=0;gotoTab('mapa');refresh();toast('Sesión cerrada')}else openAuth('login')};
+$('#au-1').onsubmit=async e=>{e.preventDefault();const E=$('#au1-err');E.textContent='';const c=normCel($('#au-cel').value);
+ if(!/^\+?\d{10,15}$/.test(c))return E.textContent='Escriba un número de celular válido.';
+ try{const d=await api('/auth/solicitar',{method:'POST',body:{celular:c}});celPend=c;
+  $('#au2-info').textContent='Enviamos un código al '+c+'.'+(d.devCode?' Código de prueba: '+d.devCode:'');
+  $('#au-1').hidden=true;$('#au-2').hidden=false;$('#au-cod').focus()}catch(x){E.textContent=x.message}};
+$('#au-2').onsubmit=async e=>{e.preventDefault();const E=$('#au2-err');E.textContent='';
+ try{const d=await api('/auth/verificar',{method:'POST',body:{celular:celPend,codigo:$('#au-cod').value.trim(),nombre:$('#au-nom').value.trim()}});setTok(d.token);await enterUser(d.usuario)}catch(x){E.textContent=x.message}};
 
-load();initMap();renderAll();
+load();initMap();renderAll();$('#reset').hidden=true;restore().then(refresh);setInterval(()=>{if(!document.hidden&&S.online)refresh()},30000);
 })();
 </script>
 </body>

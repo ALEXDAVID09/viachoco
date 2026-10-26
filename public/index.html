@@ -488,13 +488,14 @@ footer{background:#08463a;color:#cfe7de;margin-top:22px;padding:20px 16px}
  <div class="mbox">
   <div class="mhead"><h2 id="auth-t">ViaChocó Alerta</h2><p id="au-msg">Ingrese con su celular para reportar.</p><button type="button" class="mx" id="au-x" aria-label="Cerrar">✕</button></div>
   <form id="au-1" class="mform" novalidate>
-   <label for="au-nom">Nombre (solo la primera vez)</label><input type="text" id="au-nom" autocomplete="name">
+   
    <label for="au-cel">Celular</label><input type="tel" id="au-cel" autocomplete="tel" inputmode="tel" placeholder="3xx xxx xxxx">
    <p class="err" id="au1-err" role="alert"></p>
    <button class="btn" type="submit">Enviar código</button>
   </form>
   <form id="au-2" class="mform" hidden novalidate>
    <p class="hint" id="au2-info"></p>
+   <div id="au-nomw" hidden><label for="au-nom">Su nombre (es su primera vez)</label><input type="text" id="au-nom" autocomplete="name"></div>
    <label for="au-cod">Código de 6 dígitos</label><input type="text" id="au-cod" inputmode="numeric" maxlength="6" autocomplete="one-time-code">
    <p class="err" id="au2-err" role="alert"></p>
    <button class="btn" type="submit">Verificar e ingresar</button>
@@ -755,8 +756,8 @@ $('#au-1').onsubmit=async e=>{e.preventDefault();const E=$('#au1-err');E.textCon
  if(!/^\+?\d{10,15}$/.test(c))return E.textContent='Escriba un número de celular válido.';
  try{const d=await api('/auth/solicitar',{method:'POST',body:{celular:c}});celPend=c;
   $('#au2-info').textContent='Enviamos un código al '+c+'.'+(d.devCode?' Código de prueba: '+d.devCode:'');
-  $('#au-1').hidden=true;$('#au-2').hidden=false;$('#au-cod').focus()}catch(x){E.textContent=x.message}};
-$('#au-2').onsubmit=async e=>{e.preventDefault();const E=$('#au2-err');E.textContent='';
+  $('#au-nomw').hidden=!d.nuevo;$('#au-1').hidden=true;$('#au-2').hidden=false;$(d.nuevo?'#au-nom':'#au-cod').focus()}catch(x){E.textContent=x.message}};
+$('#au-2').onsubmit=async e=>{e.preventDefault();const E=$('#au2-err');E.textContent='';if(!$('#au-nomw').hidden&&$('#au-nom').value.trim().length<3)return E.textContent='Escriba su nombre para crear la cuenta.';
  try{const d=await api('/auth/verificar',{method:'POST',body:{celular:celPend,codigo:$('#au-cod').value.trim(),nombre:$('#au-nom').value.trim()}});setTok(d.token);await enterUser(d.usuario)}catch(x){E.textContent=x.message}};
 
 load();initMap();renderAll();$('#reset').hidden=true;restore().then(refresh);setInterval(()=>{if(!document.hidden&&S.online)refresh()},30000);

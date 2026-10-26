@@ -30,7 +30,8 @@ app.post('/api/auth/solicitar', wrap(async (req, res) => {
   const code = String(crypto.randomInt(100000, 1000000));
   await pool.query('INSERT INTO codigos_verificacion(celular,codigo_hash) VALUES($1,$2)', [cel, sha(code)]);
   console.log(`[SMS simulado] ${cel}: ${code}`);          // Aquí se conectaría un proveedor real de SMS
-  res.json({ ok: true, devCode: DEV ? code : undefined });
+  const ex = await pool.query('SELECT 1 FROM usuarios WHERE celular=$1', [cel]);
+  res.json({ ok: true, nuevo: ex.rowCount === 0, devCode: DEV ? code : undefined });
 }));
 
 app.post('/api/auth/verificar', wrap(async (req, res) => {

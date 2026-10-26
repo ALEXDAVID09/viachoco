@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>ViaChocó Alerta · Prototipo v0.5</title>
+<link rel="icon" type="image/png" href="VIACHOCO.png?v=2">
+<link rel="apple-touch-icon" href="VIACHOCO.png?v=2">
+<meta name="theme-color" content="#0b6b55">
+<style>
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-layer{position:absolute;left:0;top:0}
+.leaflet-container{overflow:hidden;font:12px/1.5 system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+.leaflet-tile,.leaflet-marker-icon{user-select:none;-webkit-user-drag:none}
+.leaflet-tile{visibility:hidden}.leaflet-tile-loaded{visibility:inherit}
+.leaflet-container .leaflet-overlay-pane svg{max-width:none!important;max-height:none!important}
+.leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-tile-pane img,.leaflet-container .leaflet-tile{max-width:none!important;max-height:none!important;width:auto;padding:0}
+.leaflet-container.leaflet-touch-drag{touch-action:pinch-zoom}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom{touch-action:none}
+.leaflet-pane{z-index:400}.leaflet-tile-pane{z-index:200}.leaflet-overlay-pane{z-index:400}.leaflet-shadow-pane{z-index:500}.leaflet-marker-pane{z-index:600}.leaflet-tooltip-pane{z-index:650}.leaflet-popup-pane{z-index:700}
+.leaflet-map-pane svg{z-index:200}
+.leaflet-control{position:relative;z-index:800;pointer-events:auto;float:left;clear:both}
+.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none}
+.leaflet-top{top:0}.leaflet-right{right:0}.leaflet-bottom{bottom:0}.leaflet-left{left:0}
+.leaflet-right .leaflet-control{float:right}
+.leaflet-top .leaflet-control{margin-top:10px}.leaflet-bottom .leaflet-control{margin-bottom:10px}
+.leaflet-left .leaflet-control{margin-left:10px}.leaflet-right .leaflet-control{margin-right:10px}
+.leaflet-fade-anim .leaflet-popup{opacity:0;transition:opacity .2s linear}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup{opacity:1}
+.leaflet-zoom-animated{transform-origin:0 0}
+.leaflet-zoom-anim .leaflet-zoom-animated{transition:transform .25s cubic-bezier(0,0,.25,1)}
+.leaflet-zoom-anim .leaflet-tile,.leaflet-pan-anim .leaflet-tile{transition:none}
+.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden}
+.leaflet-interactive{cursor:pointer}.leaflet-grab{cursor:grab}.leaflet-dragging .leaflet-grab{cursor:grabbing}
+.leaflet-marker-icon,.leaflet-pane>svg path,.leaflet-tile-container{pointer-events:none}
+.leaflet-marker-icon.leaflet-interactive,.leaflet-pane>svg path.leaflet-interactive{pointer-events:auto}
+.leaflet-bar{box-shadow:0 1px 5px rgba(0,0,0,.25);border-radius:6px}
+.leaflet-bar a{background:#fff;border-bottom:1px solid #ddd;width:30px;height:30px;line-height:30px;display:block;text-align:center;text-decoration:none;color:#10261f;font:bold 18px/30px monospace}
+.leaflet-bar a:first-child{border-radius:6px 6px 0 0}.leaflet-bar a:last-child{border-radius:0 0 6px 6px;border-bottom:0}
+.leaflet-bar a:hover{background:#f1f5f3}.leaflet-bar a.leaflet-disabled{color:#bbb}
+.leaflet-control-attribution{background:rgba(255,255,255,.85);padding:0 5px;color:#333;font-size:11px}
+.leaflet-control-attribution a{color:#0b5d4b;text-decoration:none}
+.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px}
+.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px;background:#fff;color:#10261f;box-shadow:0 3px 14px rgba(0,0,0,.25)}
+.leaflet-popup-content{margin:12px 14px;line-height:1.4;font-size:13px;min-width:200px}
+.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin:-1px 0 0 -20px;overflow:hidden;pointer-events:none}
+.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;transform:rotate(45deg);background:#fff;box-shadow:0 3px 14px rgba(0,0,0,.25)}
+.leaflet-container a.leaflet-popup-close-button{position:absolute;top:0;right:0;width:24px;height:24px;font:16px/24px Tahoma,sans-serif;color:#757575;text-align:center;text-decoration:none}
+.leaflet-tooltip{position:absolute;padding:5px 8px;background:#fff;border-radius:6px;color:#10261f;white-space:nowrap;pointer-events:none;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.leaflet-div-icon{background:none;border:0}
+</style>
+<style>
+:root{color-scheme:light;
+  --brand:#0b6b55;--brand-d:#08463a;--brand-l:#e9f5f0;
+  --ink:#14281f;--mut:#5f7169;--bg:#f7faf9;--card:#fff;--line:#e2eae6;
+  --verde:#178a4c;--amarillo:#c98a00;--rojo:#c8352a;--gris:#7a8b86;
+  --shadow:0 1px 2px rgba(20,40,31,.05),0 6px 18px rgba(20,40,31,.06);--r:14px}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.45}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+[hidden]{display:none!important}
+.top{background:#fff;border-bottom:1px solid var(--line);padding:10px 22px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:12px}.brand svg{width:40px;height:40px;flex:none}
+.logo{height:62px;width:auto;max-width:62vw;display:block}.hasLogo svg{display:none}
+.brand h1{margin:0;font-size:19px;color:var(--brand-d)}.brand p{margin:0;font-size:12px;color:var(--mut)}
+.ctrl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:13px}
+.ctrl select{padding:6px 10px;border-radius:8px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit}
+.chip{background:var(--brand-l);color:var(--brand);padding:5px 12px;border-radius:99px;font-weight:600;white-space:nowrap}
+.switch{display:flex;align-items:center;gap:8px;cursor:pointer;margin:0;color:var(--ink)}
+.switch input{position:absolute;opacity:0}
+.switch .track{width:36px;height:20px;border-radius:99px;background:#cdd8d3;position:relative;transition:.2s}
+.switch .track::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:.2s}
+.switch input:checked+.track{background:var(--brand)}.switch input:checked+.track::after{transform:translateX(16px)}
+.switch input:focus-visible+.track{outline:3px solid var(--brand);outline-offset:2px}
+main{max-width:1240px;margin:0 auto;padding:16px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card h2{margin:0 0 10px;font-size:16px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+label{display:block;font-size:13px;color:var(--mut);margin:12px 0 4px}
+input[type=text],input[type=tel],input[type=file],select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+input[type=range]{width:100%;accent-color:var(--brand)}
+textarea{min-height:84px;resize:vertical}
+.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1;min-width:160px}
+.btn{background:var(--brand);color:#fff;border:0;border-radius:10px;padding:10px 18px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{filter:brightness(1.1)}.btn.sec{background:var(--brand-l);color:var(--brand)}
+.hint{font-size:12px;color:var(--mut)}
+.pill{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:600;color:#fff}
+.pill.verificado{background:var(--verde)}.pill.pendiente{background:var(--amarillo)}.pill.resuelto{background:var(--gris)}
+.warn{background:#fff7e0;color:#5b4300;border:1px solid #efd48a;padding:9px 12px;border-radius:10px;font-size:13px;margin-bottom:10px}
+.mapwrap{display:grid;grid-template-columns:minmax(0,1fr) 370px;gap:14px;align-items:start}
+.two{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+.mapbox{position:relative;border-radius:var(--r);overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow);background:#fff}
+#map{height:clamp(420px,74vh,760px);width:100%;z-index:1;background:
+ linear-gradient(rgba(11,107,85,.07) 1px,transparent 1px) 0 0/48px 48px,
+ linear-gradient(90deg,rgba(11,107,85,.07) 1px,transparent 1px) 0 0/48px 48px,#f6faf8}
+.basesw{position:absolute;top:12px;right:12px;z-index:900;display:flex;background:#fff;border-radius:10px;box-shadow:var(--shadow);overflow:hidden;border:1px solid var(--line)}
+.basesw button{border:0;background:none;color:var(--ink);padding:7px 12px;font:inherit;font-size:12px;cursor:pointer}
+.basesw button[aria-pressed=true]{background:var(--brand);color:#fff}
+.legend{position:absolute;left:12px;bottom:26px;z-index:900;background:#fff;padding:9px 12px;border-radius:10px;box-shadow:var(--shadow);font-size:12px;border:1px solid var(--line)}
+.legend b{display:block;margin-bottom:4px}.legend div{display:flex;align-items:center;gap:7px;margin:3px 0}
+.legend i{display:inline-block;width:22px;border-top:5px solid;border-radius:3px}.legend i.d{border-top-style:dashed}
+.legend em{width:16px;height:16px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.maperr{position:absolute;top:56px;left:50%;transform:translateX(-50%);z-index:900;background:#fff7e0;color:#5b4300;border:1px solid #efd48a;border-radius:10px;padding:8px 14px;font-size:12px;max-width:88%;text-align:center}
+.fab{position:absolute;right:14px;bottom:26px;z-index:900;box-shadow:0 6px 18px rgba(0,0,0,.2);border-radius:99px!important}
+.mk{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;font-size:15px;border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.mk.pend{border-style:dashed}
+.town{font:600 12px system-ui;color:#10261f;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;white-space:nowrap}
+.town::before{content:"";display:inline-block;width:7px;height:7px;border-radius:50%;background:#10261f;margin-right:5px}
+.route{display:flex;padding:11px 12px;border-radius:12px;margin-bottom:8px;border:1px solid var(--line);border-left:6px solid var(--gris);background:#fff}
+.route.verde{border-left-color:var(--verde)}.route.amarillo{border-left-color:var(--amarillo)}.route.rojo{border-left-color:var(--rojo)}
+.route .st{font-weight:700;font-size:13px}.route.verde .st{color:var(--verde)}.route.amarillo .st{color:var(--amarillo)}.route.rojo .st{color:var(--rojo)}
+.route .adv{font-size:12px;color:var(--mut)}
+.route .tag{font-size:11px;background:var(--brand-l);color:var(--brand);padding:1px 8px;border-radius:99px;margin-left:6px;font-weight:600}
+.segs{display:flex;gap:3px;margin-top:6px}.segs span{height:6px;flex:1;border-radius:3px;background:var(--gris)}
+.segs .verde{background:var(--verde)}.segs .amarillo{background:var(--amarillo)}.segs .rojo{background:var(--rojo)}
+.trm{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--line);font-size:13px}.trm:first-child{border-top:0}
+.trm i{width:12px;height:12px;border-radius:50%;flex:none}.trm span{flex:1}.trm b{font-size:12px}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chips button{border:1px solid var(--line);background:#fff;color:var(--ink);padding:5px 12px;border-radius:99px;font:inherit;font-size:12px;cursor:pointer}
+.chips button[aria-pressed=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
+.scroll{max-height:46vh;overflow-y:auto}
+.rep{border-top:1px solid var(--line);padding:11px 0}.rep:first-child{border-top:0}
+.rep .t{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.rep .meta{font-size:12px;color:var(--mut);margin:3px 0 6px}
+.rep img{max-width:150px;border-radius:10px;display:block;margin:6px 0}
+.pbtn{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.pbtn button{border:0;background:var(--brand-l);color:var(--brand);border-radius:8px;padding:7px 11px;cursor:pointer;font:inherit;font-size:12px;font-weight:600}
+.chat{background:var(--brand-l);border-radius:12px;padding:12px;height:360px;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:84%;padding:8px 12px;border-radius:14px;white-space:pre-wrap;font-size:14px;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.msg.u{align-self:flex-end;background:#d7f5c6}.msg.b{align-self:flex-start;background:#fff}
+.bar{display:flex;align-items:center;gap:10px;margin:7px 0;font-size:13px}.bar span.l{width:130px;flex:none}
+.bar i{display:block;height:14px;background:var(--brand);border-radius:5px;min-width:3px}
+.kpi{text-align:center;margin:0!important}.kpi b{font-size:28px;display:block;color:var(--brand)}.kpi span{font-size:12px;color:var(--mut)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}th{color:var(--mut);font-size:12px}
+.alert{border-left:5px solid var(--amarillo);padding:8px 12px;margin:8px 0;background:var(--bg);border-radius:6px;font-size:14px}
+.alert.rojo{border-color:var(--rojo)}.alert.verde{border-color:var(--verde)}
+#toasts{position:fixed;right:14px;bottom:14px;display:flex;flex-direction:column;gap:8px;z-index:3000;max-width:360px}
+.toast{background:#14281f;color:#fff;padding:11px 15px;border-radius:12px;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:18px 16px 28px}
+
+/* ---- Formulario de reporte profesional ---- */
+.rform{max-width:760px;margin-inline:auto;padding:0;overflow:hidden}
+.rhead{background:linear-gradient(135deg,var(--brand-d),var(--brand));color:#fff;padding:20px 22px}
+.rhead h2{color:#fff;margin:0 0 4px;font-size:20px}.rhead p{margin:0;font-size:13px;opacity:.9}
+.rbody{padding:18px 22px 0}
+.fsec{border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px;background:#fff}
+.fsec h3{margin:0 0 12px;font-size:15px;display:flex;align-items:center;gap:10px}
+.fsec h3 span{width:26px;height:26px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:13px;flex:none}
+.fsec label:first-of-type{margin-top:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:10px}
+.tiles.s3{grid-template-columns:repeat(3,1fr)}
+.tile{position:relative;margin:0!important;color:var(--ink)!important;display:block}
+.tile input{position:absolute;opacity:0;inset:0;width:100%;height:100%;cursor:pointer;margin:0}
+.tile span{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:12px 6px;min-height:78px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:13px;text-align:center;transition:.15s}
+.tile span b{font-size:23px;line-height:1}.tile span small{font-size:11px;color:var(--mut)}
+.tile:hover span{border-color:#b9d3c9}
+.tile input:checked+span{border-color:var(--brand);background:var(--brand-l);color:var(--brand-d);font-weight:700;box-shadow:0 0 0 3px rgba(11,107,85,.12)}
+.tile input:focus-visible+span{outline:3px solid var(--brand);outline-offset:2px}
+.tiles.s3 .tile:nth-child(1) input:checked+span{border-color:var(--verde);background:#e8f6ee;color:var(--verde)}
+.tiles.s3 .tile:nth-child(2) input:checked+span{border-color:var(--amarillo);background:#fff7e0;color:#8a5f00}
+.tiles.s3 .tile:nth-child(3) input:checked+span{border-color:var(--rojo);background:#fdecea;color:var(--rojo)}
+.estnow{display:inline-flex;align-items:center;gap:6px;font-size:12px;margin-top:6px;padding:3px 10px;border-radius:99px;background:var(--bg);border:1px solid var(--line)}
+.estnow i{width:9px;height:9px;border-radius:50%}
+.kmv{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.cnt{float:right;font-size:11px;color:var(--mut)}
+.submitbar{position:sticky;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--line);padding:12px 22px;margin-top:4px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.submitbar .btn{flex:1;min-width:200px;padding:14px;font-size:16px}
+.submitbar .hint{flex:1 1 100%}
+.okbox{display:none;margin:18px 22px;padding:14px;border-radius:12px;background:#e8f6ee;border:1px solid #b6e0c5;color:#0d5a31;font-size:14px}
+@media(max-width:960px){.mapwrap,.two{grid-template-columns:1fr}#map{height:clamp(360px,58vh,560px)}.scroll{max-height:none}}
+@media(max-width:600px){.logo{height:46px}main{padding:10px}.card{padding:14px}.rform{padding:0;border-radius:12px}.rhead{padding:16px}.rbody{padding:14px 12px 0}.fsec{padding:13px}
+ .submitbar{padding:10px 12px}.tiles{grid-template-columns:repeat(2,1fr)}.tiles.s3{grid-template-columns:1fr}
+ .tiles.s3 .tile span{flex-direction:row;justify-content:flex-start;padding:12px 14px;min-height:52px;text-align:left}
+ input[type=text],input[type=tel],input[type=file],select,textarea{font-size:16px}
+ .brand p,.legend{display:none}.bar span.l{width:96px}.top{padding:10px 12px}.ctrl{width:100%;justify-content:space-between}
+ .basesw button{padding:7px 9px}.fab{bottom:14px}#toasts{left:10px;right:10px;max-width:none}}
+.modal{position:fixed;inset:0;z-index:2500;background:rgba(10,30,22,.55);display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto}
+.mbox{background:#fff;border-radius:16px;width:100%;max-width:440px;box-shadow:0 20px 50px rgba(0,0,0,.3);overflow:hidden;margin:auto}
+.mhead{background:linear-gradient(135deg,var(--brand-d),var(--brand));color:#fff;padding:18px 54px 16px 20px;position:relative}
+.mhead h2{margin:0 0 3px;font-size:19px}.mhead p{margin:0;font-size:13px;opacity:.92}
+.mx{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.2);color:#fff;border:0;border-radius:50%;width:34px;height:34px;font-size:18px;cursor:pointer}
+.mtabs{display:flex;border-bottom:1px solid var(--line)}
+.mtabs button{flex:1;padding:13px;background:none;border:0;border-bottom:3px solid transparent;font:inherit;font-weight:600;color:var(--mut);cursor:pointer}
+.mtabs button[aria-selected=true]{color:var(--brand);border-bottom-color:var(--brand)}
+.mform{padding:6px 20px 20px}.mform .btn{width:100%;padding:13px;margin-top:14px;font-size:16px}
+.err{color:var(--rojo);font-size:13px;min-height:18px;margin:8px 0 0}
+.chk{display:flex!important;gap:8px;align-items:flex-start;color:var(--ink)!important;font-size:12px!important}.chk input{margin-top:3px}
+@media(max-width:600px){.modal{align-items:flex-end;padding:0}.mbox{border-radius:16px 16px 0 0;max-width:none}.mform input,.mform select{font-size:16px}}
+
+/* ---- Encabezado, hero y menú profesional ---- */
+.ubtn{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:99px;padding:4px 14px 4px 4px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+.ubtn:hover{background:var(--brand-l)}.ubtn small{color:var(--mut);font-weight:500;font-size:12px;border-left:1px solid var(--line);padding-left:8px}
+.av{width:30px;height:30px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:14px}
+.hero{background:linear-gradient(120deg,#08463a 0%,#0b6b55 60%,#178a4c 100%);color:#fff;position:relative;overflow:hidden}
+.hero::after{content:"";position:absolute;left:0;right:0;bottom:12px;border-top:4px dashed rgba(255,255,255,.18)}
+.hero-in{max-width:1240px;margin:0 auto;padding:26px 18px 36px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:22px;align-items:center;position:relative;z-index:1}
+.hero h2{margin:0 0 8px;font-size:clamp(22px,3.2vw,32px);line-height:1.15}
+.hero p{margin:0 0 16px;opacity:.92;font-size:15px;max-width:520px}
+.hero-cta{display:flex;gap:10px;flex-wrap:wrap}
+.btn.light{background:#fff;color:var(--brand-d)}.btn.ghost{background:rgba(255,255,255,.14);color:#fff;border:1px solid rgba(255,255,255,.4)}
+.hstats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.hst{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:14px;padding:12px 14px}
+.hst b{display:block;font-size:26px;line-height:1.1}.hst span{font-size:12px;opacity:.92;display:flex;align-items:center;gap:6px}
+.hst i{width:9px;height:9px;border-radius:50%;display:inline-block}
+.hupd{grid-column:1/-1;font-size:12px;opacity:.85}
+nav{background:#fff;position:sticky;top:0;z-index:1100;border-bottom:1px solid var(--line);box-shadow:0 2px 8px rgba(20,40,31,.05)}
+.navin{max-width:1240px;margin:0 auto;display:flex;gap:6px;padding:8px 16px;overflow-x:auto;scrollbar-width:none}
+.navin::-webkit-scrollbar{display:none}
+nav button{display:flex;align-items:center;justify-content:center;gap:8px;flex:1;min-width:max-content;background:none;border:0;color:var(--mut);padding:10px 16px;font:inherit;font-size:14px;font-weight:500;cursor:pointer;border-radius:10px;transition:.15s}
+nav button svg{width:18px;height:18px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+nav button:hover{color:var(--brand);background:var(--brand-l)}
+nav button[aria-selected=true]{color:#fff;background:var(--brand);font-weight:600;box-shadow:0 2px 8px rgba(11,107,85,.3)}
+.ns{display:none}
+@media(max-width:760px){.hero-in{grid-template-columns:1fr;padding:18px 14px 30px;gap:14px}.hero p{font-size:14px}.hst b{font-size:22px}}
+@media(max-width:700px){
+ nav{position:fixed;top:auto;bottom:0;left:0;right:0;border-top:1px solid var(--line);border-bottom:0;box-shadow:0 -4px 16px rgba(20,40,31,.1);padding-bottom:env(safe-area-inset-bottom,0)}
+ .navin{padding:4px 6px;gap:2px;overflow:visible}
+ nav button{flex-direction:column;gap:2px;padding:7px 2px;font-size:10.5px;min-width:0;border-radius:8px;box-shadow:none!important}
+ nav button svg{width:21px;height:21px}.nl{display:none}.ns{display:inline}
+ body{padding-bottom:calc(64px + env(safe-area-inset-bottom,0px))}
+ .submitbar{bottom:calc(58px + env(safe-area-inset-bottom,0px))}#toasts{bottom:76px}}
+/* ---- Mapa sin espacios en blanco: el mapa acompaña al hacer scroll y el panel lateral tiene su propio scroll ---- */
+@media(min-width:961px){
+ #tab-mapa .mapbox,#tab-mapa aside{position:sticky;top:72px}
+ #tab-mapa #map{height:clamp(460px,calc(100vh - 100px),820px)}
+ #tab-mapa aside{max-height:clamp(460px,calc(100vh - 100px),820px);overflow-y:auto;padding:2px 4px 2px 2px;scrollbar-width:thin}
+ #tab-mapa .scroll{max-height:none;overflow:visible}
+}
+/* ---- Bloques explicativos y chat tipo teléfono ---- */
+.how{background:var(--brand-l);border:1px solid #cfe7de;border-radius:14px;padding:14px 16px;margin-bottom:14px}
+.how h3{margin:0 0 4px;font-size:15px;color:var(--brand-d)}.how p{margin:0;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:12px}
+.stp{background:#fff;border-radius:10px;padding:10px 12px;font-size:13px;color:var(--mut)}
+.stp b{display:flex;gap:8px;align-items:center;color:var(--ink);margin-bottom:4px;font-size:14px}
+.stp b span{width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:12px;flex:none}
+code{background:#fff;border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:12px;color:var(--brand-d)}
+.botgrid{display:grid;grid-template-columns:minmax(0,430px) minmax(0,1fr);gap:14px;align-items:start}
+.phone{padding:0;overflow:hidden;margin-bottom:0}
+.phead{display:flex;align-items:center;gap:10px;background:var(--brand-d);color:#fff;padding:12px 14px}
+.phead small{display:block;font-size:11px;opacity:.85}
+.pav{width:38px;height:38px;border-radius:50%;background:#fff;color:var(--brand);display:grid;place-items:center;font-weight:800;flex:none}
+.phead select{margin-left:auto;width:auto;padding:5px 8px;font-size:12px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.4);border-radius:8px}
+.phead select option{color:#14281f}
+.pbody{padding:12px}#tab-bot .chat{height:320px}
+@media(max-width:900px){.botgrid{grid-template-columns:1fr}}
+/* ---- Paleta llamativa y cautelosa (verde / ámbar / rojo, como el logo) ---- */
+:root{--bg:#edf3ef;--brand-l:#e0f1e8;--line:#d3e2da;--amber:#f5b800;--amber-d:#c98a00;--shadow:0 1px 2px rgba(8,70,58,.07),0 8px 22px rgba(8,70,58,.09)}
+body{background:linear-gradient(180deg,#d8ece3 0,#edf3ef 460px,#edf3ef)}
+section.hero{display:block}
+.top{position:relative;padding-top:18px}
+.top::before{content:"";position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--verde) 0 34%,var(--amber) 34% 67%,var(--rojo) 67%)}
+.hero{background:radial-gradient(circle at 88% 15%,rgba(245,184,0,.28),transparent 42%),linear-gradient(120deg,#063b30 0%,#0b6b55 58%,#14894f 100%)}
+.hero::after{border-top:0;height:9px;bottom:0;background:repeating-linear-gradient(-45deg,#f5b800 0 14px,#1b1b1b 14px 28px)}
+.hero-in{padding-bottom:44px}
+.hl{color:#ffd54a}
+.btn.light{background:var(--amber);color:#2b1d00}
+.btn.light:hover{filter:brightness(1.05)}
+.fab,.submitbar .btn{background:var(--amber);color:#2b1d00}
+.hst{background:rgba(255,255,255,.14)}
+.card{border-color:#cfe0d7}
+.card h2::before{content:"";display:inline-block;width:6px;height:16px;border-radius:3px;margin-right:9px;vertical-align:-2px;background:linear-gradient(var(--verde) 0 33%,var(--amber) 33% 66%,var(--rojo) 66%)}
+.rhead h2::before{display:none}
+.mapbox{border:2px solid #bcd7ca}
+.route.verde{background:#eaf8ef}.route.amarillo{background:#fff6d9}.route.rojo{background:#fde8e5}
+.route{border-color:#d3e2da}
+nav{background:#fff;border-bottom:2px solid #cfe0d7}
+nav button[aria-selected=true]{background:linear-gradient(135deg,#08463a,#0b6b55)}
+.chip{background:#d8efe3}
+.kpi b{color:var(--brand-d)}
+.how{background:#e3f3ea;border-color:#bfe0d0}
+footer{background:#08463a;color:#cfe7de;margin-top:22px;padding:20px 16px}
+@media(max-width:700px){footer{padding-bottom:24px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <img class="logo" src="VIACHOCO.png" alt="ViaChocó, estado de las vías del Chocó" onload="this.parentNode.classList.add('hasLogo')" onerror="this.hidden=true;this.nextElementSibling.removeAttribute('hidden')">
+    <svg hidden viewBox="0 0 48 48" aria-hidden="true"><rect width="48" height="48" rx="12" fill="#e9f5f0"/><path d="M24 7c-6.1 0-11 4.7-11 10.6C13 25.5 24 38 24 38s11-12.5 11-20.4C35 11.7 30.1 7 24 7z" fill="#0b6b55"/><circle cx="24" cy="17.5" r="4.2" fill="#fff"/><path d="M10 43l6-6h16l6 6" fill="none" stroke="#0b6b55" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 4"/></svg>
+    <div class="btxt"><h1>ViaChocó Alerta</h1><p>Estado colaborativo de las vías del Chocó</p></div>
+  </div>
+  <div class="ctrl">
+    <label class="switch"><input type="checkbox" id="online" checked><span class="track"></span><span id="online-l">En línea</span></label>
+    <span class="chip" id="rep" hidden></span>
+    <button type="button" class="btn" id="userbtn"></button>
+  </div>
+</header>
+
+<section class="hero" id="hero" aria-label="Resumen del estado de las vías">
+  <div class="hero-in">
+    <div>
+      <h2>Conozca el estado de las vías del Chocó <span class="hl">antes de salir</span></h2>
+      <p>Reportes de la comunidad, verificados y en tiempo real, para viajar con información en Quibdó, Istmina, Tadó y las rutas hacia Medellín y Pereira.</p>
+      <div class="hero-cta"><button type="button" class="btn light" data-act="go" data-tab="reportar">＋ Reportar incidente</button><button type="button" class="btn ghost" data-act="go" data-tab="alertas">Activar alertas</button></div>
+    </div>
+    <div class="hstats" id="hstats"></div>
+  </div>
+</section>
+<nav id="nav" role="tablist" aria-label="Secciones"><div class="navin">
+  <button role="tab" data-tab="mapa" aria-selected="true"><svg viewBox="0 0 24 24" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg><span>Mapa</span></button>
+  <button role="tab" data-tab="reportar" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span>Reportar</span></button>
+  <button role="tab" data-tab="bot" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8z"/></svg><span class="nl">SMS / WhatsApp</span><span class="ns">SMS</span></button>
+  <button role="tab" data-tab="alertas" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg><span>Alertas</span></button>
+  <button role="tab" data-tab="panel" data-aut hidden aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg><span>Panel</span></button>
+  <button role="tab" data-tab="prueba" aria-selected="false"><svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg><span>Prueba</span></button>
+</div></nav>
+
+<main>
+<section id="tab-mapa" class="on" role="tabpanel">
+  <div class="mapwrap">
+    <div class="mapbox">
+      <div id="map" aria-label="Mapa de las vías del Chocó"></div>
+      <div class="basesw" id="basesw" role="group" aria-label="Capa del mapa"></div>
+      <div class="maperr" id="maperr" hidden>No se cargaron las imágenes del mapa (sin internet o bloqueadas). Se muestra la vista esquemática de los tramos.</div>
+      <div class="legend" aria-hidden="true">
+        <b>Estado del tramo</b>
+        <div><i style="border-color:var(--verde)"></i>Transitable</div>
+        <div><i class="d" style="border-color:var(--amarillo)"></i>Precaución</div>
+        <div><i style="border-color:var(--rojo)"></i>Cerrado</div>
+        <b style="margin-top:6px">Reporte</b>
+        <div><em style="background:var(--rojo)"></em>Verificado</div>
+        <div><em style="background:var(--amarillo)"></em>Pendiente</div>
+      </div>
+      <button class="btn fab" data-act="go" data-tab="reportar">＋ Reportar</button>
+    </div>
+    <aside>
+      <div class="card"><h2>¿Puedo viajar?</h2><div id="semaforo"></div></div>
+      <div class="card"><h2>Estado por tramo</h2><div id="tramos"></div></div>
+      <div class="card"><h2>Reportes</h2>
+        <div class="chips" id="filtros" role="group" aria-label="Filtrar reportes" style="margin-bottom:6px"></div>
+        <div id="lista" class="scroll"></div></div>
+    </aside>
+  </div>
+</section>
+
+<section id="tab-reportar" role="tabpanel">
+  <div class="card rform">
+    <div class="rhead"><h2>Reportar un incidente en la vía</h2><p>Su reporte ayuda a otros viajeros. Toma menos de un minuto.</p></div>
+    <div class="warn" id="qwarn" hidden style="margin:14px 22px 0"></div>
+    <form id="frm" novalidate>
+      <div class="rbody">
+        <div class="fsec">
+          <h3><span>1</span>¿Qué ocurrió?</h3>
+          <div class="tiles" role="radiogroup" aria-label="Tipo de incidente" id="tiles-tipo"></div>
+        </div>
+        <div class="fsec">
+          <h3><span>2</span>¿Dónde?</h3>
+          <label for="f-tramo">Tramo</label>
+          <select name="tramo" id="f-tramo"></select>
+          <div class="estnow" id="f-est"></div>
+          <div class="kmv" style="margin-top:14px"><label for="f-frac" style="margin:0">Ubicación aproximada</label><b id="f-km" style="font-size:13px"></b></div>
+          <input type="range" name="frac" id="f-frac" min="0" max="100" value="50" style="margin-top:6px">
+          <div class="row" style="margin-top:10px;align-items:center">
+            <button type="button" class="btn sec" id="btn-gps" style="flex:0 0 auto">📍 Usar mi ubicación GPS</button>
+            <span class="hint" id="gpsinfo">Sin GPS: se usa la posición del control deslizante.</span>
+          </div>
+        </div>
+        <div class="fsec">
+          <h3><span>3</span>¿Qué tan grave es?</h3>
+          <div class="tiles s3" role="radiogroup" aria-label="Gravedad">
+            <label class="tile"><input type="radio" name="sev" value="1"><span><b>🟢</b>Leve<small>Se pasa sin problema</small></span></label>
+            <label class="tile"><input type="radio" name="sev" value="2" checked><span><b>🟡</b>Moderada<small>Paso lento o un carril</small></span></label>
+            <label class="tile"><input type="radio" name="sev" value="3"><span><b>🔴</b>Grave<small>No se puede pasar</small></span></label>
+          </div>
+        </div>
+        <div class="fsec">
+          <h3><span>4</span>Detalles <small class="hint" style="font-weight:400">(opcional)</small></h3>
+          <label for="f-desc">Descripción <span class="cnt" id="f-cnt">0/200</span></label>
+          <textarea name="desc" id="f-desc" maxlength="200" placeholder="Ej.: Derrumbe en el km 45, pasa un solo carril"></textarea>
+          <label for="f-foto">Foto</label>
+          <input type="file" id="f-foto" accept="image/*" capture="environment">
+          <div id="f-prev"></div>
+        </div>
+      </div>
+      <div class="submitbar">
+        <button class="btn" type="submit">Enviar reporte</button>
+        <div class="hint">Sin conexión, el reporte se guarda en una cola y se envía al volver la señal. También puede reportar por SMS o WhatsApp.</div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section id="tab-bot" role="tabpanel">
+  <div class="how" ><h3>💡 ¿Para qué sirve esta sección?</h3><p>Muchas personas en el Chocó no tienen internet o datos en la carretera. Con este canal pueden <b>consultar y reportar el estado de las vías enviando un mensaje de texto</b>, sin abrir la app. Aquí es una simulación para que pruebe cómo funcionaría.</p><div class="steps"><div class="stp"><b><span>1</span>Consulte</b>Escriba <code>ESTADO</code> y el bot responde cómo está cada tramo.</div><div class="stp"><b><span>2</span>Reporte</b>Escriba <code>REPORTE DERRUMBE T1 km 45 grave</code> y el incidente queda registrado.</div><div class="stp"><b><span>3</span>Compruebe</b>Vaya a la pestaña Mapa: el reporte aparece ahí.</div></div></div>
+  <div class="botgrid">
+    <div class="card phone">
+      <div class="phead"><div class="pav">V</div><div><b>ViaChocó Alerta</b><small>Bot de mensajes · simulación</small></div>
+        <select id="bot-canal" aria-label="Canal simulado"><option>SMS</option><option>WhatsApp</option></select></div>
+      <div class="pbody">
+        <div class="chat" id="chat" aria-live="polite"></div>
+        <p class="hint" style="margin:10px 0 6px">Toque un ejemplo o escriba su mensaje:</p>
+        <div class="chips" style="margin-bottom:10px">
+          <button type="button" data-cmd="AYUDA">AYUDA</button><button type="button" data-cmd="ESTADO">ESTADO</button>
+          <button type="button" data-cmd="ESTADO T1">ESTADO T1</button>
+          <button type="button" data-cmd="REPORTE DERRUMBE T1 km 45 grave">REPORTE DERRUMBE T1 km 45 grave</button>
+        </div>
+        <div class="row" style="flex-wrap:nowrap">
+          <input type="text" id="bot-in" aria-label="Mensaje" placeholder="Escriba un mensaje…" autocomplete="off">
+          <button class="btn" id="bot-send" style="flex:0 0 auto">Enviar</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Comandos que entiende el bot</h2>
+      <div style="overflow-x:auto"><table>
+        <tr><th>Escriba</th><th>Qué hace</th></tr>
+        <tr><td><code>AYUDA</code></td><td>Muestra la lista de comandos.</td></tr>
+        <tr><td><code>ESTADO</code></td><td>Estado de todos los tramos.</td></tr>
+        <tr><td><code>ESTADO T1</code></td><td>Estado de un solo tramo.</td></tr>
+        <tr><td><code>REPORTE &lt;TIPO&gt; &lt;TRAMO&gt; km N GRAVE</code></td><td>Registra un incidente. El km y GRAVE son opcionales.</td></tr>
+      </table></div>
+      <p class="hint"><b>Tipos:</b> DERRUMBE, HUNDIMIENTO, INUNDACION, CIERRE, RESTRICCION.<br><b>Tramos:</b> T1 Quibdó–Medellín · T2 Quibdó–Istmina · T3 Istmina–Tadó · T4 Tadó–Pereira.</p>
+      <p class="hint">En la versión real, un número de celular (con un servicio como Twilio o WhatsApp Business) recibiría estos mensajes aunque no haya internet. Para reportar aquí debe haber iniciado sesión.</p>
+    </div>
+  </div>
+</section>
+
+<section id="tab-alertas" role="tabpanel">
+  <div class="how" ><h3>💡 ¿Para qué sirve esta sección?</h3><p>Para que <b>le avisemos cuando cambie el estado de las vías que usted recorre</b>, sin tener que abrir el mapa a cada rato.</p><div class="steps"><div class="stp"><b><span>1</span>Elija sus rutas</b>Marque las rutas que viaja (por ejemplo Quibdó–Medellín).</div><div class="stp"><b><span>2</span>Elija el canal</b>Push, WhatsApp o SMS, según lo que use.</div><div class="stp"><b><span>3</span>Reciba el aviso</b>Si un tramo pasa a Precaución o Cerrado, le llega la alerta y queda en el historial.</div></div></div>
+  <div class="mapwrap two">
+    <div class="card">
+      <h2>Suscribirme a rutas</h2>
+      <div id="rutas"></div>
+      <div class="row">
+        <div><label for="a-canal">Canal de alerta</label><select id="a-canal"><option>Push</option><option>WhatsApp</option><option>SMS</option></select></div>
+        <div><label for="a-tel">Celular (simulado)</label><input type="tel" id="a-tel" placeholder="3xx xxx xxxx"></div>
+      </div>
+      <p class="row" style="gap:8px"><button class="btn" id="a-save" style="flex:1">Guardar suscripción</button><button class="btn sec" id="a-test" type="button" style="flex:1">Ver una alerta de ejemplo</button></p>
+      <div class="hint">Cuando un tramo de sus rutas cambie de color, aparecerá la alerta aquí y como aviso en pantalla.</div>
+    </div>
+    <div class="card"><h2>Historial de alertas</h2><div id="alertas"></div></div>
+  </div>
+</section>
+
+<section id="tab-panel" role="tabpanel">
+  <div class="grid" id="kpis" style="margin-bottom:14px"></div>
+  <div class="mapwrap two">
+    <div class="card"><h2>Puntos críticos (reportes por tramo)</h2><div id="b-tramo"></div></div>
+    <div class="card"><h2>Reportes por tipo de incidente</h2><div id="b-tipo"></div></div>
+  </div>
+  <div class="card"><h2>Priorización de tramos</h2><div style="overflow-x:auto" id="t-prior"></div>
+    <p class="hint">Puntaje = suma de la gravedad (1 a 3) de los reportes activos del tramo; los verificados pesan el doble.</p></div>
+  <div class="card"><h2>Datos</h2>
+    <div class="chips">
+      <button class="btn sec" id="csv-rep">⬇ Exportar reportes (CSV)</button>
+      <button class="btn sec" id="reset">↺ Borrar todos los datos</button>
+    </div>
+    <p class="hint">Vista para INVÍAS, Gobernación y gestión del riesgo: histórico y priorización de puntos críticos.</p></div>
+</section>
+
+<section id="tab-prueba" role="tabpanel">
+  <div class="how" style="max-width:820px;margin-inline:auto"><h3>💡 ¿Para qué sirve esta sección?</h3><p>Es el <b>registro de las pruebas con usuarios reales</b> que pide la actividad del prototipo: deja evidencia de que otras personas usaron la app y qué opinan. Úsela el equipo, con cada persona que pruebe.</p><div class="steps"><div class="stp"><b><span>1</span>Pida 3 tareas</b>Que la persona reporte un derrumbe, consulte si puede viajar Quibdó–Medellín y se suscriba a una ruta.</div><div class="stp"><b><span>2</span>Registre el resultado</b>Marque lo que logró sin ayuda, califique de 1 a 5 y anote comentarios.</div><div class="stp"><b><span>3</span>Use los datos</b>Abajo se calculan los porcentajes y promedios; exporte el CSV para el informe.</div></div></div>
+  <div class="card" style="max-width:820px;margin-inline:auto">
+    <h2>Registro de prueba de usuario</h2>
+    
+    <form id="tfrm">
+      <div class="row">
+        <div><label for="t-nombre">Nombre o código</label><input type="text" id="t-nombre" name="nombre" required></div>
+        <div><label for="t-perfil">Perfil</label><select id="t-perfil" name="perfil"><option>Conductor</option><option>Transportador de carga</option><option>Pasajero</option><option>Productor / comerciante</option><option>Compañero de clase</option><option>Entidad / otro</option></select></div>
+      </div>
+      <label>Tareas completadas sin ayuda</label>
+      <label style="margin:2px 0;color:var(--ink)"><input type="checkbox" name="t1"> 1. Reportar un derrumbe</label>
+      <label style="margin:2px 0;color:var(--ink)"><input type="checkbox" name="t2"> 2. Saber si puede viajar Quibdó–Medellín</label>
+      <label style="margin:2px 0;color:var(--ink)"><input type="checkbox" name="t3"> 3. Suscribirse a alertas de una ruta</label>
+      <div class="row">
+        <div><label for="q1">Facilidad de uso (1-5)</label><select id="q1" name="q1"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+        <div><label for="q2">Utilidad (1-5)</label><select id="q2" name="q2"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+        <div><label for="q3">La usaría (1-5)</label><select id="q3" name="q3"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select></div>
+      </div>
+      <div class="row">
+        <div><label for="t-canal">Canal preferido</label><select id="t-canal" name="canal"><option>App web</option><option>WhatsApp</option><option>SMS</option></select></div>
+        <div><label for="t-pago">Disposición a pagar al mes</label><select id="t-pago" name="pago"><option>Nada</option><option>Hasta $10.000</option><option>$10.000 a $30.000</option><option>Más de $30.000</option></select></div>
+      </div>
+      <label for="t-com">Comentarios y mejoras sugeridas</label>
+      <textarea id="t-com" name="com"></textarea>
+      <p><button class="btn" type="submit">Guardar resultado</button></p>
+    </form>
+  </div>
+  <div class="grid" id="tkpis" style="margin-bottom:14px"></div>
+  <div class="card"><h2>Resultados</h2><div style="overflow-x:auto" id="ttabla"></div>
+    <p><button class="btn sec" id="csv-test">⬇ Exportar pruebas (CSV)</button></p></div>
+</section>
+</main>
+<footer>ViaChocó Alerta · Prototipo para el curso Emprendimiento Tecnológico · Los trazados de las vías son aproximados.</footer>
+<div id="auth" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="auth-t">
+ <div class="mbox">
+  <div class="mhead"><h2 id="auth-t">ViaChocó Alerta</h2><p id="au-msg">Ingrese o cree su cuenta para reportar.</p><button type="button" class="mx" id="au-x" aria-label="Cerrar">✕</button></div>
+  <div class="mtabs" role="tablist"><button type="button" role="tab" data-at="login" aria-selected="true">Ingresar</button><button type="button" role="tab" data-at="reg" aria-selected="false">Crear cuenta</button></div>
+  <form id="au-login" class="mform" novalidate>
+   <label for="li-id">Celular o correo</label><input type="text" id="li-id" autocomplete="username" inputmode="email" required>
+   <label for="li-pw">Contraseña</label><input type="password" id="li-pw" autocomplete="current-password" required style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit">
+   <p class="err" id="li-err" role="alert"></p>
+   <button class="btn" type="submit">Ingresar</button>
+  </form>
+  <form id="au-reg" class="mform" hidden novalidate>
+   <label for="rg-n">Nombre completo</label><input type="text" id="rg-n" autocomplete="name" required>
+   <label for="rg-c">Celular o correo</label><input type="text" id="rg-c" autocomplete="username" inputmode="email" required>
+   <label for="rg-r">Tipo de cuenta</label><select id="rg-r"><option>Ciudadano</option><option>Líder comunitario</option><option value="Autoridad">Autoridad (requiere código)</option></select>
+   <div id="rg-codew" hidden><label for="rg-code">Código de autoridad</label><input type="password" id="rg-code" autocomplete="off" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit"><span class="hint">Se entrega solo a funcionarios de INVÍAS, Gobernación o gestión del riesgo.</span></div>
+   <div class="row" style="margin-top:0"><div><label for="rg-p">Contraseña (mín. 6)</label><input type="password" id="rg-p" autocomplete="new-password" required style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit"></div>
+   <div><label for="rg-p2">Repetir contraseña</label><input type="password" id="rg-p2" autocomplete="new-password" required style="width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:inherit"></div></div>
+   <label class="chk"><input type="checkbox" id="rg-ok"> Acepto que mis reportes se muestren públicamente con mi primer nombre.</label>
+   <p class="err" id="rg-err" role="alert"></p>
+   <button class="btn" type="submit">Crear cuenta</button>
+  </form>
+ </div>
+</div>
+<div id="toasts" role="status" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script>
+(function(){
+'use strict';
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='vca_v04';
+const AUTH_CODE='CHOCO-AUT-2026'; /* cámbielo: código que se entrega solo a funcionarios */
+const COL={verde:'#178a4c',amarillo:'#c98a00',rojo:'#c8352a',gris:'#7a8b86'};
+const TIPOS={derrumbe:'Derrumbe',hundimiento:'Hundimiento',inundacion:'Inundación',cierre:'Cierre de paso',restriccion:'Paso restringido'};
+const ICON={derrumbe:'⛰️',hundimiento:'⬇️',inundacion:'🌊',cierre:'⛔',restriccion:'🚧'};
+const LBL={verde:'Transitable',amarillo:'Precaución',rojo:'Cerrado'};
+const ADV={verde:'Vía en estado normal. Mantenga la precaución habitual.',amarillo:'Viaje con cuidado, salga con luz de día y revise los reportes.',rojo:'No recomendado: hay un cierre verificado. Espere o busque alternativa.'};
+const TRAMOS=[
+ {id:'T1',short:'Quibdó–Medellín',name:'Quibdó – Medellín (vía Carmen de Atrato)',km:220,pts:[[5.6947,-76.6611],[5.69,-76.45],[5.80,-76.30],[5.9006,-76.1583],[5.85,-76.02],[6.05,-75.80],[6.2442,-75.5812]]},
+ {id:'T2',short:'Quibdó–Istmina',name:'Quibdó – Istmina',km:55,pts:[[5.6947,-76.6611],[5.55,-76.66],[5.35,-76.67],[5.1567,-76.6847]]},
+ {id:'T3',short:'Istmina–Tadó',name:'Istmina – Tadó',km:30,pts:[[5.1567,-76.6847],[5.22,-76.63],[5.2656,-76.5586]]},
+ {id:'T4',short:'Tadó–Pereira',name:'Tadó – Pereira (vía Pueblo Rico)',km:110,pts:[[5.2656,-76.5586],[5.25,-76.30],[5.2214,-76.0306],[5.0,-75.85],[4.8133,-75.6961]]}
+];
+const RUTAS=[{id:'QM',name:'Quibdó – Medellín',tramos:['T1']},{id:'QP',name:'Quibdó – Pereira',tramos:['T2','T3','T4']},{id:'QIT',name:'Quibdó – Istmina – Tadó',tramos:['T2','T3']}];
+const TOWNS=[['Quibdó',5.6947,-76.6611],['Medellín',6.2442,-75.5812],['Pereira',4.8133,-75.6961],['Istmina',5.1567,-76.6847],['Tadó',5.2656,-76.5586],['Carmen de Atrato',5.9006,-76.1583],['Pueblo Rico',5.2214,-76.0306]];
+const TR=id=>TRAMOS.find(t=>t.id===id);
+const ORD={verde:0,amarillo:1,rojo:2};
+let S,map,layer,baseLayer,markers={},gps=null,photo=null,filtro='activos',tileOK=false,tileErr=0;
+
+function pointAt(t,f){const p=t.pts,L=[];let tot=0;for(let i=1;i<p.length;i++){const d=Math.hypot(p[i][0]-p[i-1][0],p[i][1]-p[i-1][1]);L.push(d);tot+=d}
+ let x=f*tot;for(let i=0;i<L.length;i++){if(x<=L[i]||i===L.length-1){const r=L[i]?Math.min(1,x/L[i]):0;return[p[i][0]+(p[i+1][0]-p[i][0])*r,p[i][1]+(p[i+1][1]-p[i][1])*r]}x-=L[i]}}
+function nearestTramo(lat,lng){let best=null,bd=1e9;TRAMOS.forEach(t=>{for(let k=0;k<=20;k++){const q=pointAt(t,k/20),d=Math.hypot(q[0]-lat,q[1]-lng);if(d<bd){bd=d;best=t.id}}});return{id:best,d:bd}}
+
+/* Estado inicial: sin reportes = todas las vías en estado normal (transitable) */
+function seed(){return{users:[],session:null,role:'Ciudadano',rep:20,online:true,queue:[],nid:1,alerts:[],tests:[],last:{},sub:{rutas:['QM'],canal:'Push',tel:''},reports:[]}}
+function load(){
+ try{S=JSON.parse(localStorage.getItem(KEY))}catch(e){S=null}
+ if(!S||!Array.isArray(S.reports))S=seed();
+ S.users=S.users||[];if(!S.users.some(u=>u.id===S.session))S.session=null;
+ S.alerts=S.alerts||[];S.tests=S.tests||[];S.queue=S.queue||[];
+ S.sub=S.sub||{rutas:['QM'],canal:'Push',tel:''};
+ S.role=cur()?cur().rol:'Ciudadano';if(typeof S.rep!=='number')S.rep=20;if(cur()&&typeof cur().rep==='number')S.rep=cur().rep;if(S.online===undefined)S.online=true;
+ S.nid=Math.max(S.nid||1,...S.reports.map(r=>r.id+1),...S.queue.map(r=>r.id+1));
+ S.last=S.last||{};TRAMOS.forEach(t=>{if(!S.last[t.id])S.last[t.id]=tStatus(t.id)})}
+function save(){const u=cur();if(u)u.rep=S.rep;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('No se pudo guardar: almacenamiento lleno o bloqueado')}}
+function tStatus(id){const a=S.reports.filter(r=>r.t===id&&r.st!=='resuelto');if(!a.length)return'verde';
+ return a.some(r=>r.st==='verificado'&&(r.sev===3||r.tipo==='cierre'))?'rojo':'amarillo'}
+function rStatus(r){let w='verde';r.tramos.forEach(id=>{const s=tStatus(id);if(ORD[s]>ORD[w])w=s});return w}
+const ago=t=>{const m=Math.round((Date.now()-t)/60000);return m<1?'ahora':m<60?'hace '+m+' min':m<1440?'hace '+Math.round(m/60)+' h':'hace '+Math.round(m/1440)+' d'};
+function toast(m){const d=document.createElement('div');d.className='toast';d.textContent=m;$('#toasts').appendChild(d);setTimeout(()=>d.remove(),6000)}
+
+function commit(){
+ TRAMOS.forEach(t=>{const ns=tStatus(t.id),os=S.last[t.id]||'verde';
+  if(ns!==os){const r=RUTAS.find(r=>r.tramos.includes(t.id)&&S.sub.rutas.includes(r.id));
+   if(r){const msg=ORD[ns]>ORD[os]?'ALERTA: '+t.short+' ('+r.name+') pasó a '+LBL[ns].toUpperCase()+'. Evalúe antes de salir.':'Mejora: '+t.short+' ('+r.name+') ahora está '+LBL[ns].toLowerCase()+'.';
+    S.alerts.unshift({ts:Date.now(),msg:msg,canal:S.sub.canal,lvl:ns});toast('['+S.sub.canal+'] '+msg)}
+   S.last[t.id]=ns}});
+ save();renderAll()}
+function verify(r){if(r.st==='pendiente'){r.st='verificado';r.vts=Date.now();if(r.mine)S.rep+=10}}
+function submitReport(r){
+ if(!S.online&&r.canal==='App web'){S.queue.push(r);save();toast('Sin conexión: reporte guardado en la cola');renderAll();return false}
+ if(S.role!=='Ciudadano')verify(r);
+ S.reports.unshift(r);commit();return true}
+const byId=id=>S.reports.find(x=>x.id===id);
+function confirmar(id){if(!need('Inicie sesión para confirmar reportes.'))return;const r=byId(id);if(!r||r.st==='resuelto')return;r.conf++;S.rep+=2;if(S.role!=='Ciudadano'||r.conf>=3)verify(r);toast('Gracias por confirmar (+2 de reputación)');if(map)map.closePopup();commit()}
+function negar(id){if(!need('Inicie sesión para opinar sobre un reporte.'))return;const r=byId(id);if(!r)return;r.deny++;if(r.deny>=3||S.role!=='Ciudadano')r.st='resuelto';if(map)map.closePopup();commit()}
+function resolver(id){if(!need('Inicie sesión para continuar.'))return;const r=byId(id);if(!r)return;r.st='resuelto';if(map)map.closePopup();commit()}
+function acciones(r,withMap){const v=withMap?'<button data-act="ver" data-id="'+r.id+'">📍 Ver en mapa</button>':'';
+ if(r.st==='resuelto')return v?'<div class="pbtn">'+v+'</div>':'';
+ return'<div class="pbtn">'+v+'<button data-act="conf" data-id="'+r.id+'">✔ Confirmar</button><button data-act="deny" data-id="'+r.id+'">✖ Ya no está</button>'+(S.role==='Autoridad'?'<button data-act="res" data-id="'+r.id+'">Marcar resuelto</button>':'')+'</div>'}
+const safeImg=u=>typeof u==='string'&&u.startsWith('data:image/')?u:'';
+
+function gotoTab(name){if(name==='panel'&&S.role!=='Autoridad'){toast('El panel es solo para autoridades.');name='mapa'}
+if(name==='reportar'&&!cur()){openAuth('login','Cree una cuenta o inicie sesión para reportar.','reportar');return}
+
+ $$('#nav button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===name)));
+ $$('main > section').forEach(s=>s.classList.toggle('on',s.id==='tab-'+name));
+ $('#hero').hidden=name!=='mapa';
+ if(name==='mapa'&&map)setTimeout(()=>map.invalidateSize(),60);
+ window.scrollTo({top:0,behavior:'smooth'})}
+$$('#nav button').forEach(b=>b.addEventListener('click',()=>gotoTab(b.dataset.tab)));
+document.addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(!b)return;const id=+b.dataset.id,a=b.dataset.act;
+ if(a==='conf')confirmar(id);else if(a==='deny')negar(id);else if(a==='res')resolver(id);
+ else if(a==='ver')focusReport(id);else if(a==='go')gotoTab(b.dataset.tab)});
+$('#online').onchange=e=>{S.online=e.target.checked;
+ if(S.online&&S.queue.length){const n=S.queue.length;S.queue.forEach(r=>{if(S.role!=='Ciudadano')verify(r);S.reports.unshift(r)});S.queue=[];toast('Conexión restablecida: '+n+' reporte(s) sincronizado(s)');commit()}
+ else{save();renderAll()}};
+
+const BASES={
+ calles:{n:'Calles',url:'https://tile.openstreetmap.org/{z}/{x}/{y}.png',o:{maxZoom:19,attribution:'© OpenStreetMap'}},
+ claro:{n:'Claro',url:'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',o:{maxNativeZoom:16,maxZoom:18,attribution:'Tiles © Esri'}},
+ relieve:{n:'Relieve',url:'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',o:{maxZoom:17,attribution:'© OpenTopoMap · © OpenStreetMap'}},
+ satelite:{n:'Satélite',url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',o:{maxZoom:18,attribution:'Imágenes © Esri'}}
+};
+function setBase(k,auto){
+ if(!map)return;tileOK=false;tileErr=0;$('#maperr').hidden=true;
+ if(baseLayer)map.removeLayer(baseLayer);
+ baseLayer=L.tileLayer(BASES[k].url,BASES[k].o);
+ baseLayer.on('tileload',()=>{tileOK=true;$('#maperr').hidden=true});
+ baseLayer.on('tileerror',()=>{tileErr++;if(!tileOK&&tileErr===4){const ks=Object.keys(BASES),n=ks[ks.indexOf(k)+1];if(n&&auto!==false)setBase(n);else $('#maperr').hidden=false}});
+ baseLayer.addTo(map);baseLayer.bringToBack();
+ $$('#basesw button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.k===k)))}
+function fitAll(){const b=L.latLngBounds([]);TRAMOS.forEach(t=>t.pts.forEach(p=>b.extend(p)));map.fitBounds(b,{padding:[36,36]})}
+function initMap(){
+ const el=$('#map');
+ if(typeof L==='undefined'){el.innerHTML='<p style="padding:20px">No se pudo cargar la librería del mapa (revise su conexión a internet). El resto del prototipo funciona.</p>';return}
+ map=L.map(el,{minZoom:6,maxZoom:18}).setView([5.45,-76.1],8);
+ layer=L.layerGroup().addTo(map);
+ $('#basesw').innerHTML=Object.keys(BASES).map(k=>'<button type="button" data-k="'+k+'" aria-pressed="false">'+BASES[k].n+'</button>').join('');
+ $$('#basesw button').forEach(b=>b.onclick=()=>setBase(b.dataset.k,false));
+ setBase('calles');fitAll();
+ setTimeout(()=>{map.invalidateSize();fitAll()},250);
+ if(window.ResizeObserver)new ResizeObserver(()=>map.invalidateSize()).observe(el);
+ window.addEventListener('resize',()=>map.invalidateSize());
+ window.addEventListener('load',()=>{map.invalidateSize();fitAll()})}
+function popup(r){const img=safeImg(r.photo);
+ return'<b>'+ICON[r.tipo]+' '+TIPOS[r.tipo]+'</b><br>'+esc(TR(r.t).short)+'<br>'+(esc(r.desc)||'Sin descripción')+'<br><small>'+ago(r.ts)+' · '+esc(r.canal)+' · '+r.st+' · ✔'+r.conf+' ✖'+r.deny+'</small>'+(img?'<img src="'+img+'" alt="Foto del reporte" style="width:100%;border-radius:8px;margin-top:6px">':'')+acciones(r,false)}
+const showR=r=>filtro==='todos'||(filtro==='activos'?r.st!=='resuelto':r.st===filtro);
+function renderMap(){if(!map)return;layer.clearLayers();markers={};
+ TRAMOS.forEach(t=>{const s=tStatus(t.id);
+  L.polyline(t.pts,{color:'#fff',weight:11,opacity:.95}).addTo(layer);
+  L.polyline(t.pts,{color:COL[s],weight:6,dashArray:s==='amarillo'?'14 8':null}).addTo(layer)
+   .bindPopup('<b>'+esc(t.name)+'</b><br>Estado: <b style="color:'+COL[s]+'">'+LBL[s]+'</b><br><small>'+t.km+' km aprox.</small>').bindTooltip(t.short+' · '+LBL[s],{sticky:true})});
+ S.reports.filter(showR).forEach(r=>{
+  const bg=r.st==='resuelto'?COL.gris:r.st==='verificado'?COL.rojo:COL.amarillo;
+  const ic=L.divIcon({className:'',html:'<div class="mk '+(r.st==='pendiente'?'pend':'')+'" style="background:'+bg+'">'+ICON[r.tipo]+'</div>',iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-16]});
+  markers[r.id]=L.marker([r.lat,r.lng],{icon:ic,title:TIPOS[r.tipo]+' · '+TR(r.t).short}).addTo(layer).bindPopup(popup(r))});
+ TOWNS.forEach(c=>L.marker([c[1],c[2]],{interactive:false,keyboard:false,icon:L.divIcon({className:'',html:'<div class="town">'+c[0]+'</div>',iconSize:[110,16],iconAnchor:[-6,8]})}).addTo(layer))}
+function focusReport(id){const r=byId(id);if(!r)return;
+ if(!showR(r)){filtro='todos';renderAll()}
+ gotoTab('mapa');
+ setTimeout(()=>{if(!map)return;map.invalidateSize();map.flyTo([r.lat,r.lng],11,{duration:.7});const m=markers[id];if(m)setTimeout(()=>m.openPopup(),750)},80)}
+
+function renderHeader(){const u=cur();S.role=u?u.rol:'Ciudadano';$('#userbtn').innerHTML=u?'<span class="av">'+esc(u.nombre.trim()[0].toUpperCase())+'</span>'+esc(u.nombre.split(' ')[0])+'<small>Salir</small>':'Ingresar / Crear cuenta';$('#userbtn').className=u?'ubtn':'btn';$('#rep').hidden=!u;$$('[data-aut]').forEach(e=>e.hidden=S.role!=='Autoridad');$('#online').checked=S.online;$('#online-l').textContent=S.online?'En línea':'Sin conexión';
+ $('#rep').textContent='Reputación: '+S.rep+' · '+(S.rep>=60?'Referente':S.rep>=30?'Confiable':'Nuevo')}
+function renderSemaforo(){$('#semaforo').innerHTML=RUTAS.map(r=>{const s=rStatus(r),sub=S.sub.rutas.includes(r.id);
+ return'<div class="route '+s+'"><div style="flex:1"><b>'+esc(r.name)+'</b>'+(sub?'<span class="tag">🔔 Suscrito</span>':'')+'<div class="st">'+LBL[s]+'</div><div class="adv">'+ADV[s]+'</div><div class="segs">'+r.tramos.map(id=>'<span class="'+tStatus(id)+'" title="'+esc(TR(id).short)+': '+LBL[tStatus(id)]+'"></span>').join('')+'</div></div></div>'}).join('')}
+function renderTramos(){$('#tramos').innerHTML=TRAMOS.map(t=>{const s=tStatus(t.id),n=S.reports.filter(r=>r.t===t.id&&r.st!=='resuelto').length;
+ return'<div class="trm"><i style="background:'+COL[s]+'"></i><span>'+esc(t.short)+'<br><small class="hint">'+(n?n+' reporte(s) activo(s)':'Sin novedades')+'</small></span><b style="color:'+COL[s]+'">'+LBL[s]+'</b></div>'}).join('')}
+function renderFiltros(){const F=[['activos','Activos'],['verificado','Verificados'],['pendiente','Pendientes'],['resuelto','Resueltos'],['todos','Todos']];
+ $('#filtros').innerHTML=F.map(f=>'<button type="button" data-f="'+f[0]+'" aria-pressed="'+(filtro===f[0])+'">'+f[1]+'</button>').join('');
+ $$('#filtros button').forEach(b=>b.onclick=()=>{filtro=b.dataset.f;renderFiltros();renderLista();renderMap()})}
+function renderLista(){const a=S.reports.filter(showR).sort((x,y)=>y.ts-x.ts).slice(0,15);
+ $('#lista').innerHTML=a.length?a.map(r=>{const img=safeImg(r.photo);return'<div class="rep"><div class="t"><b>'+ICON[r.tipo]+' '+TIPOS[r.tipo]+'</b><span class="pill '+r.st+'">'+r.st+'</span></div><div class="meta">'+esc(TR(r.t).short)+' · '+ago(r.ts)+' · '+esc(r.canal)+(r.by?' · por '+esc(r.by):'')+' · ✔'+r.conf+' ✖'+r.deny+'</div>'+esc(r.desc)+(img?'<img src="'+img+'" alt="Foto del reporte">':'')+acciones(r,true)+'</div>'}).join(''):'<p class="hint">'+(filtro==='activos'?'Sin reportes activos: las vías están en estado normal.':'No hay reportes con este filtro.')+'</p>'}
+function renderQueue(){const w=$('#qwarn');if(S.queue.length||!S.online){w.hidden=false;w.textContent=(!S.online?'Modo sin conexión activo. ':'')+'Reportes en cola: '+S.queue.length+'.'}else w.hidden=true}
+function renderAlertas(){
+ $('#rutas').innerHTML=RUTAS.map(r=>'<label style="margin:6px 0;color:var(--ink)"><input type="checkbox" class="rchk" value="'+r.id+'" '+(S.sub.rutas.includes(r.id)?'checked':'')+'> '+esc(r.name)+' — <b style="color:'+COL[rStatus(r)]+'">'+LBL[rStatus(r)]+'</b></label>').join('');
+ $('#a-canal').value=S.sub.canal;$('#a-tel').value=S.sub.tel||'';
+ $('#alertas').innerHTML=S.alerts.length?S.alerts.slice(0,20).map(a=>'<div class="alert '+esc(a.lvl)+'"><b>'+esc(a.canal)+'</b> · '+ago(a.ts)+'<br>'+esc(a.msg)+'</div>').join(''):'<p class="hint">Sin alertas todavía. Suscríbase a una ruta y cambie el estado de un tramo reportando o confirmando incidentes.</p>'}
+function bars(el,data){const m=Math.max(1,...data.map(d=>d[1]));$(el).innerHTML=data.map(d=>'<div class="bar"><span class="l">'+esc(d[0])+'</span><i style="width:'+Math.round(d[1]/m*60)+'%"></i><b>'+d[1]+'</b></div>').join('')}
+function renderPanel(){const R=S.reports,c=s=>R.filter(r=>r.st===s).length;
+ const tv=R.filter(r=>r.vts).map(r=>(r.vts-r.ts)/60000),avg=tv.length?Math.round(tv.reduce((a,b)=>a+b,0)/tv.length)+' min':'—';
+ const k=(n,l)=>'<div class="card kpi"><b>'+n+'</b><span>'+l+'</span></div>';
+ $('#kpis').innerHTML=k(S.users.length,'Usuarios registrados')+k(R.length,'Reportes totales')+k(c('verificado'),'Verificados')+k(c('pendiente'),'Pendientes')+k(c('resuelto'),'Resueltos')+k(avg,'Tiempo medio a verificación')+k(TRAMOS.filter(t=>tStatus(t.id)!=='verde').length+'/'+TRAMOS.length,'Tramos con novedad');
+ bars('#b-tramo',TRAMOS.map(t=>[t.short,R.filter(r=>r.t===t.id).length]).sort((a,b)=>b[1]-a[1]));
+ bars('#b-tipo',Object.keys(TIPOS).map(k=>[TIPOS[k],R.filter(r=>r.tipo===k).length]));
+ const pr=TRAMOS.map(t=>{const a=R.filter(r=>r.t===t.id&&r.st!=='resuelto');return{t:t,n:a.length,sc:a.reduce((s,r)=>s+r.sev*(r.st==='verificado'?2:1),0)}}).sort((a,b)=>b.sc-a.sc);
+ $('#t-prior').innerHTML='<table><tr><th>#</th><th>Tramo</th><th>Estado</th><th>Reportes activos</th><th>Puntaje</th></tr>'+pr.map((x,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(x.t.name)+'</td><td><b style="color:'+COL[tStatus(x.t.id)]+'">'+LBL[tStatus(x.t.id)]+'</b></td><td>'+x.n+'</td><td>'+x.sc+'</td></tr>').join('')+'</table>'}
+function renderTests(){const T=S.tests,n=T.length,pr=x=>n?Math.round(x/n*100)+'%':'—',avg=f=>n?(T.reduce((a,t)=>a+(+t[f]),0)/n).toFixed(1):'—';
+ const k=(a,b)=>'<div class="card kpi"><b>'+a+'</b><span>'+b+'</span></div>';
+ $('#tkpis').innerHTML=k(n,'Personas que probaron')+k(pr(T.filter(t=>t.t1&&t.t2&&t.t3).length),'Completaron las 3 tareas')+k(avg('q1'),'Facilidad (prom.)')+k(avg('q2'),'Utilidad (prom.)')+k(pr(T.filter(t=>+t.q3>=4).length),'La usaría (4-5)');
+ $('#ttabla').innerHTML=n?'<table><tr><th>Nombre</th><th>Perfil</th><th>Tareas</th><th>Fac.</th><th>Útil</th><th>Usaría</th><th>Canal</th><th>Pago</th><th>Comentario</th></tr>'+T.map(t=>'<tr><td>'+esc(t.nombre)+'</td><td>'+esc(t.perfil)+'</td><td>'+(t.t1?1:0)+(t.t2?1:0)+(t.t3?1:0)+'/3</td><td>'+esc(t.q1)+'</td><td>'+esc(t.q2)+'</td><td>'+esc(t.q3)+'</td><td>'+esc(t.canal)+'</td><td>'+esc(t.pago)+'</td><td>'+esc(t.com)+'</td></tr>').join('')+'</table>':'<p class="hint">Aún no hay pruebas registradas.</p>'}
+function renderHero(){const c=x=>TRAMOS.filter(t=>tStatus(t.id)===x).length,a=S.reports.filter(r=>r.st!=='resuelto').length;
+ const t=(n,l,col)=>'<div class="hst"><b>'+n+'</b><span>'+(col?'<i style="background:'+col+'"></i>':'')+l+'</span></div>';
+ $('#hstats').innerHTML=t(c('verde'),'Tramos transitables','#4ade80')+t(c('amarillo'),'Con precaución','#fbbf24')+t(c('rojo'),'Tramos cerrados','#f87171')+t(a,'Reportes activos','')+'<div class="hupd">Actualizado a las '+new Date().toLocaleTimeString('es-CO',{hour:'2-digit',minute:'2-digit'})+'</div>'}
+function renderAll(){renderHero();renderHeader();renderSemaforo();renderTramos();renderFiltros();renderMap();renderLista();renderQueue();renderAlertas();renderPanel();renderTests();kmLabel()}
+
+/* ---------- Formulario ---------- */
+$('#tiles-tipo').innerHTML=Object.keys(TIPOS).map((k,i)=>'<label class="tile"><input type="radio" name="tipo" value="'+k+'"'+(i===0?' checked':'')+'><span><b>'+ICON[k]+'</b>'+TIPOS[k]+'</span></label>').join('');
+$('#f-tramo').innerHTML=TRAMOS.map(t=>'<option value="'+t.id+'">'+t.id+' · '+esc(t.name)+'</option>').join('');
+function kmLabel(){const t=TR($('#f-tramo').value);if(!t)return;$('#f-km').textContent='km '+Math.round($('#f-frac').value/100*t.km)+' de '+t.km;
+ const s=tStatus(t.id);$('#f-est').innerHTML='<i style="background:'+COL[s]+'"></i>Estado actual: <b>'+LBL[s]+'</b>'}
+$('#f-frac').oninput=()=>{gps=null;$('#gpsinfo').textContent='Sin GPS: se usa la posición del control deslizante.';kmLabel()};
+$('#f-tramo').onchange=()=>{gps=null;kmLabel()};
+$('#f-desc').oninput=e=>{$('#f-cnt').textContent=e.target.value.length+'/200'};
+$('#btn-gps').onclick=()=>{
+ if(!navigator.geolocation){toast('Este dispositivo no tiene GPS disponible');return}
+ navigator.geolocation.getCurrentPosition(p=>{const n=nearestTramo(p.coords.latitude,p.coords.longitude);
+  if(n.d>0.3){gps=null;toast('Está fuera de las vías del Chocó: se usará la posición del control deslizante');return}
+  gps=[p.coords.latitude,p.coords.longitude];$('#f-tramo').value=n.id;kmLabel();$('#gpsinfo').textContent='GPS: '+gps[0].toFixed(4)+', '+gps[1].toFixed(4)},
+  ()=>toast('No se pudo obtener el GPS'),{enableHighAccuracy:true,timeout:8000})};
+$('#f-foto').onchange=e=>{const f=e.target.files[0];photo=null;$('#f-prev').innerHTML='';if(!f)return;
+ const img=new Image,u=URL.createObjectURL(f);img.onload=()=>{const k=Math.min(1,360/img.width),c=document.createElement('canvas');c.width=img.width*k;c.height=img.height*k;c.getContext('2d').drawImage(img,0,0,c.width,c.height);photo=c.toDataURL('image/jpeg',.6);$('#f-prev').innerHTML='<img alt="Vista previa" src="'+photo+'" style="max-width:160px;border-radius:10px;margin-top:8px">';URL.revokeObjectURL(u)};img.src=u};
+$('#frm').onsubmit=e=>{e.preventDefault();if(!cur()){openAuth('login','Inicie sesión para enviar el reporte.','reportar');return}
+ const f=new FormData(e.target),tipo=f.get('tipo')||'derrumbe',t=f.get('tramo'),pos=gps||pointAt(TR(t),+f.get('frac')/100);
+ const r={id:S.nid++,t:t,tipo:tipo,sev:tipo==='cierre'?3:+(f.get('sev')||2),desc:(f.get('desc')||'').trim(),lat:pos[0],lng:pos[1],ts:Date.now(),conf:1,deny:0,st:'pendiente',canal:'App web',mine:true,by:cur().nombre.split(' ')[0],uid:cur().id};
+ if(photo)r.photo=photo;
+ const ok=submitReport(r);
+ if(ok){toast('Reporte #'+r.id+' registrado. Queda pendiente hasta que otros lo confirmen.')}
+ e.target.reset();photo=null;gps=null;$('#f-prev').innerHTML='';$('#f-cnt').textContent='0/200';kmLabel();
+ if(ok){gotoTab('mapa');setTimeout(()=>focusReport(r.id),150)}};
+
+/* ---------- Bot ---------- */
+function say(txt,who){const d=document.createElement('div');d.className='msg '+who;d.textContent=txt;$('#chat').appendChild(d);$('#chat').scrollTop=1e9}
+const norm=s=>s.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+function bot(raw){const t=norm(raw.trim()),w=t.split(/\s+/),cmd=w[0],canal=$('#bot-canal').value;
+ if(cmd==='AYUDA'||!cmd)return'Comandos:\nREPORTE <TIPO> <TRAMO> [km N] [GRAVE]\nESTADO [TRAMO]\nTipos: DERRUMBE, HUNDIMIENTO, INUNDACION, CIERRE, RESTRICCION\nTramos: '+TRAMOS.map(x=>x.id+'='+x.short).join(', ');
+ if(cmd==='ESTADO'){if(w[1]){const x=TR(w[1]);return x?x.short+': '+LBL[tStatus(x.id)]:'Tramo no válido. Escriba AYUDA.'}
+  return TRAMOS.map(x=>x.id+' '+x.short+': '+LBL[tStatus(x.id)]).join('\n')}
+ if(cmd==='REPORTE'){if(!cur())return'Debe iniciar sesión en la app para reportar.';const tipo=Object.keys(TIPOS).find(k=>norm(k)===w[1]),x=TR(w[2]);
+  if(!tipo||!x)return'Formato no válido. Ejemplo: REPORTE DERRUMBE T1 km 45 grave';
+  const km=(t.match(/KM\s*(\d+)/)||[])[1],p=pointAt(x,km?Math.min(1,+km/x.km):.5);
+  const r={id:S.nid++,t:x.id,tipo:tipo,sev:(/GRAVE/.test(t)||tipo==='cierre')?3:2,desc:raw.trim().split(/\s+/).slice(3).join(' '),lat:p[0],lng:p[1],ts:Date.now(),conf:1,deny:0,st:'pendiente',canal:canal,mine:true,by:cur().nombre.split(' ')[0],uid:cur().id};
+  submitReport(r);return'Reporte #'+r.id+' recibido: '+TIPOS[tipo]+' en '+x.short+'. Queda pendiente de verificación. Gracias.'}
+ return'No entendí el mensaje. Escriba AYUDA.'}
+function send(v){v=(v||$('#bot-in').value).trim();if(!v)return;say(v,'u');$('#bot-in').value='';setTimeout(()=>say(bot(v),'b'),350)}
+$('#bot-send').onclick=()=>send();$('#bot-in').onkeydown=e=>{if(e.key==='Enter')send()};
+$$('[data-cmd]').forEach(b=>b.onclick=()=>send(b.dataset.cmd));
+say('ViaChocó Alerta: escriba AYUDA para ver los comandos.','b');
+
+/* ---------- Alertas y datos ---------- */
+$('#a-test').onclick=()=>{const r=RUTAS.find(x=>S.sub.rutas.includes(x.id))||RUTAS[0],c=$('#a-canal').value;
+ const msg='EJEMPLO: '+r.name+' pasó a CERRADO por un derrumbe verificado. Evalúe antes de salir.';
+ S.alerts.unshift({ts:Date.now(),msg:msg,canal:c,lvl:'rojo'});save();renderAlertas();toast('['+c+'] '+msg)};
+$('#a-save').onclick=()=>{S.sub={rutas:$$('.rchk:checked').map(x=>x.value),canal:$('#a-canal').value,tel:$('#a-tel').value.trim()};save();renderSemaforo();toast('Suscripción guardada: '+(S.sub.rutas.length||'ninguna')+' ruta(s) por '+S.sub.canal)};
+function download(name,rows){const csv='\ufeff'+rows.map(r=>r.map(c=>'"'+String(c==null?'':c).replace(/"/g,'""')+'"').join(',')).join('\n');
+ const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));a.download=name;a.click()}
+$('#csv-rep').onclick=()=>download('reportes_viachoco.csv',[['id','fecha','tramo','tipo','gravedad','estado','canal','lat','lng','confirmaciones','descripcion']].concat(S.reports.map(r=>[r.id,new Date(r.ts).toISOString(),TR(r.t).short,TIPOS[r.tipo],r.sev,r.st,r.canal,r.lat.toFixed(5),r.lng.toFixed(5),r.conf,r.desc])));
+$('#reset').onclick=()=>{if(confirm('¿Borrar todos los datos? Se eliminarán reportes, alertas y pruebas, y las vías volverán al estado normal.')){const U=S.users,SE=S.session;S=seed();S.users=U;S.session=SE;TRAMOS.forEach(t=>S.last[t.id]=tStatus(t.id));save();renderAll();toast('Datos borrados: todas las vías en estado normal')}};
+$('#tfrm').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);
+ S.tests.push({nombre:f.get('nombre'),perfil:f.get('perfil'),t1:!!f.get('t1'),t2:!!f.get('t2'),t3:!!f.get('t3'),q1:f.get('q1'),q2:f.get('q2'),q3:f.get('q3'),canal:f.get('canal'),pago:f.get('pago'),com:f.get('com'),fecha:new Date().toISOString()});
+ e.target.reset();save();renderTests();toast('Resultado de prueba guardado')};
+$('#csv-test').onclick=()=>download('pruebas_viachoco.csv',[['fecha','nombre','perfil','tarea1','tarea2','tarea3','facilidad','utilidad','usaria','canal','pago','comentario']].concat(S.tests.map(t=>[t.fecha,t.nombre,t.perfil,t.t1?1:0,t.t2?1:0,t.t3?1:0,t.q1,t.q2,t.q3,t.canal,t.pago,t.com])));
+
+/* ---------- Cuentas (locales en este dispositivo) ---------- */
+function cur(){return S&&S.users?S.users.find(u=>u.id===S.session)||null:null}
+function need(m){if(cur())return true;openAuth('login',m);return false}
+let after=null;
+async function hash(p,salt){const s=salt+'|'+p;try{if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}}catch(e){}
+ let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return'f'+(h>>>0).toString(16)}
+const cid=v=>v.trim().toLowerCase().replace(/\s+/g,'');
+function setAT(t){$('#rg-codew').hidden=$('#rg-r').value!=='Autoridad';$$('[data-at]').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.at===t)));$('#au-login').hidden=t!=='login';$('#au-reg').hidden=t!=='reg';$('#li-err').textContent='';$('#rg-err').textContent=''}
+function openAuth(t,msg,next){after=next||null;$('#au-msg').textContent=msg||'Ingrese o cree su cuenta para reportar.';setAT(t);$('#auth').hidden=false;setTimeout(()=>$(t==='login'?'#li-id':'#rg-n').focus(),50)}
+function closeAuth(){$('#auth').hidden=true;after=null}
+function enter(u){S.session=u.id;S.rep=typeof u.rep==='number'?u.rep:20;const n=after;$('#auth').hidden=true;after=null;save();renderAll();toast('Bienvenido, '+u.nombre.split(' ')[0]);if(n)gotoTab(n)}
+$('#rg-r').onchange=e=>{$('#rg-codew').hidden=e.target.value!=='Autoridad'};
+$$('[data-at]').forEach(b=>b.onclick=()=>setAT(b.dataset.at));
+$('#au-x').onclick=closeAuth;$('#auth').onclick=e=>{if(e.target.id==='auth')closeAuth()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#auth').hidden)closeAuth()});
+$('#userbtn').onclick=()=>{if(cur()){S.session=null;S.rep=20;save();gotoTab('mapa');renderAll();toast('Sesión cerrada')}else openAuth('login')};
+$('#au-login').onsubmit=async e=>{e.preventDefault();const u=S.users.find(x=>x.contacto===cid($('#li-id').value));
+ if(!u||u.hash!==await hash($('#li-pw').value,u.salt)){$('#li-err').textContent='Datos incorrectos. Revise e intente de nuevo.';return}
+ e.target.reset();enter(u)};
+$('#au-reg').onsubmit=async e=>{e.preventDefault();const n=$('#rg-n').value.trim().replace(/\s+/g,' '),c=cid($('#rg-c').value),p=$('#rg-p').value,E=$('#rg-err'),
+ mail=/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(c),tel=/^\+?\d{7,13}$/.test(c);
+ if(n.length<3)return E.textContent='Escriba su nombre completo.';
+ if(!mail&&!tel)return E.textContent='Escriba un correo válido o un celular (solo números).';
+ if(p.length<6)return E.textContent='La contraseña debe tener al menos 6 caracteres.';
+ if(p!==$('#rg-p2').value)return E.textContent='Las contraseñas no coinciden.';
+ if($('#rg-r').value==='Autoridad'&&$('#rg-code').value.trim()!==AUTH_CODE)return E.textContent='Código de autoridad incorrecto.';
+ if(!$('#rg-ok').checked)return E.textContent='Debe aceptar para continuar.';
+ if(S.users.some(u=>u.contacto===c))return E.textContent='Ya existe una cuenta con ese celular o correo. Ingrese.';
+ const salt=Math.random().toString(36).slice(2)+Date.now().toString(36),u={id:'u'+Date.now(),nombre:n,contacto:c,salt:salt,hash:await hash(p,salt),rol:$('#rg-r').value,creado:new Date().toISOString(),rep:20};
+ S.users.push(u);e.target.reset();enter(u)};
+
+load();initMap();renderAll();
+})();
+</script>
+</body>
+</html>
